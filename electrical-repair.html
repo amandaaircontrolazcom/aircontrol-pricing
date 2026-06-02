@@ -509,19 +509,19 @@
         <span class="breakdown-value" id="bd-material">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Tech commission (18%)</span>
+        <span>Tech labor pay (18%)</span>
         <span class="breakdown-value" id="bd-commission">$0</span>
       </div>
       <div class="breakdown-row total">
-        <span>True cost (incl. commission)</span>
+        <span>Quoted price</span>
         <span class="breakdown-value" id="bd-allin">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Net profit after commission</span>
+        <span>Gross profit</span>
         <span class="breakdown-value" id="bd-profit">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Margin after commission</span>
+        <span>Gross margin</span>
         <span class="breakdown-value" id="bd-margin">0%</span>
       </div>
     </div>
@@ -697,13 +697,13 @@ function calc() {
   // Active (quoted) price based on customer type
   const activePrice = activeCustType === 'cc' ? ccPrice : standardPrice;
 
-  // Tech commission = % of the quoted price (Standard or CC depending on customer type)
-  const commission = activePrice * (commissionPct / 100);
+  // Labor pay (tech commission) = % of the quoted price
+  const laborPay = activePrice * (commissionPct / 100);
 
-  // True cost (including commission as real labor expense)
-  const trueCost = allInCost + commission;
-  const profitAfterCommission = activePrice - trueCost;
-  const grossMarginAfterCommission = activePrice > 0 ? (profitAfterCommission / activePrice) * 100 : 0;
+  // Gross profit = Price − Materials − Labor pay
+  // Gross margin = Gross profit / Price
+  const grossProfit = activePrice - materialCost - laborPay;
+  const grossMargin = activePrice > 0 ? (grossProfit / activePrice) * 100 : 0;
 
   // Render
   document.getElementById('sum-total').textContent = fmt(activePrice);
@@ -712,11 +712,11 @@ function calc() {
   // Gross margin line under the big price (visible to all roles)
   const gmEl = document.getElementById('sum-gross-margin');
   const gmLine = document.getElementById('gross-margin-line');
-  gmEl.textContent = grossMarginAfterCommission.toFixed(1) + '%';
-  // Color by health: green if >= target margin, amber if 5-target, red below 5
+  gmEl.textContent = grossMargin.toFixed(1) + '%';
+  // Color by health
   gmEl.className = '';
-  if (grossMarginAfterCommission >= marginPct - 5) gmEl.className = '';
-  else if (grossMarginAfterCommission >= 5) gmEl.className = 'warn';
+  if (grossMargin >= 50) gmEl.className = '';
+  else if (grossMargin >= 30) gmEl.className = 'warn';
   else gmEl.className = 'bad';
   gmLine.style.display = '';
 
@@ -734,13 +734,13 @@ function calc() {
   // Admin breakdown
   document.getElementById('bd-labor').textContent = fmt(breakEvenLabor);
   document.getElementById('bd-material').textContent = fmt(materialCost);
-  document.getElementById('bd-commission').textContent = fmt(commission);
+  document.getElementById('bd-commission').textContent = fmt(laborPay);
   // Update commission label to show actual %
   const commLabel = document.querySelector('#breakdown .breakdown-row:nth-child(3) span:first-child');
-  if (commLabel) commLabel.textContent = `Tech commission (${commissionPct}%)`;
-  document.getElementById('bd-allin').textContent = fmt(trueCost);
-  document.getElementById('bd-profit').textContent = fmt(profitAfterCommission);
-  document.getElementById('bd-margin').textContent = grossMarginAfterCommission.toFixed(1) + '%';
+  if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
+  document.getElementById('bd-allin').textContent = fmt(activePrice);
+  document.getElementById('bd-profit').textContent = fmt(grossProfit);
+  document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
 }
 
 // ============================================
