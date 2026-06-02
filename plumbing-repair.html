@@ -479,6 +479,13 @@
             <span class="input-affix input-suffix">%</span>
           </div>
         </div>
+        <div class="field">
+          <label class="label">Min margin floor %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="floor-pct" value="50" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
       </div>
       <div class="hint">
         <strong style="color: var(--accent);">Display only.</strong>
@@ -533,6 +540,10 @@
       <div class="breakdown-row">
         <span>Gross profit</span>
         <span class="breakdown-value" id="bd-profit">$0</span>
+      </div>
+      <div class="breakdown-row" id="floor-row" style="display: none;">
+        <span>Margin floor applied</span>
+        <span class="breakdown-value" id="bd-floor" style="color: var(--amber);">YES</span>
       </div>
       <div class="breakdown-row">
         <span>Raw margin</span>
@@ -685,6 +696,7 @@ function calc() {
   const commissionPct = num('commission-pct') || 18;
   const laborLoadingPct = num('labor-loading-pct') || 4;
   const fudgePct = num('fudge-pct') || 5;
+  const floorPct = num('floor-pct') || 50;
 
   // Empty state — show $0 until inputs filled
   if (hours <= 0 || materialCost <= 0) {
@@ -701,6 +713,8 @@ function calc() {
     document.getElementById('bd-profit').textContent = '$0';
     document.getElementById('bd-raw-margin').textContent = '0%';
     document.getElementById('bd-margin').textContent = '0%';
+    const floorRow = document.getElementById('floor-row');
+    if (floorRow) floorRow.style.display = 'none';
     return;
   }
 
@@ -718,10 +732,30 @@ function calc() {
   const standardUncapped = markupFactor > 0 ? ccPrice / markupFactor : ccPrice;
   const standardMarkupRaw = standardUncapped - ccPrice;
   const standardMarkup = Math.min(standardMarkupRaw, ccCap);
-  const standardPrice = ccPrice + standardMarkup;
+
+  // Margin floor: back-solve for price that yields exactly floorPct adjusted margin
+  const floorAdjustment = (floorPct + laborLoadingPct + fudgePct) / 100;
+  const commissionDecimal = commissionPct / 100;
+  const floorDenom = 1 - commissionDecimal - floorAdjustment;
+  const ccPriceFloor = floorDenom > 0 ? materialCost / floorDenom : Infinity;
+
+  // Apply floor to CC. Then derive Standard from the floored CC using the same
+  // markup formula — so the CC/Standard spread is preserved.
+  const ccFloorApplied = ccPriceFloor > ccPrice;
+  const finalCcPrice = Math.max(ccPrice, ccPriceFloor);
+  let standardPrice;
+  if (!ccFloorApplied) {
+    standardPrice = ccPrice + standardMarkup;
+  } else {
+    const stdUncapped = markupFactor > 0 ? finalCcPrice / markupFactor : finalCcPrice;
+    const stdMarkupFromFloor = Math.min(stdUncapped - finalCcPrice, ccCap);
+    standardPrice = finalCcPrice + stdMarkupFromFloor;
+  }
+  const stdFloorApplied = ccFloorApplied;
 
   // Active (quoted) price based on customer type
-  const activePrice = activeCustType === 'cc' ? ccPrice : standardPrice;
+  const activePrice = activeCustType === 'cc' ? finalCcPrice : standardPrice;
+  const floorAppliedToActive = activeCustType === 'cc' ? ccFloorApplied : stdFloorApplied;
 
   // Labor pay (tech commission) = % of the quoted price
   const laborPay = activePrice * (commissionPct / 100);
@@ -750,7 +784,7 @@ function calc() {
   document.getElementById('price-comparison').style.display = '';
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('sum-standard').textContent = fmt(standardPrice);
-  document.getElementById('sum-cc').textContent = fmt(ccPrice);
+  document.getElementById('sum-cc').textContent = fmt(finalCcPrice);
 
   // Highlight the active row in the comparison
   document.getElementById('row-standard').querySelectorAll('.price-row-label, .price-row-value')
@@ -768,8 +802,17 @@ function calc() {
   document.getElementById('bd-profit').textContent = fmt(grossProfit);
   document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
   document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
-  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(7) span:first-child');
+  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(8) span:first-child');
   if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
+  // Show floor indicator if floor was applied to the active price
+  const floorRow = document.getElementById('floor-row');
+  const floorVal = document.getElementById('bd-floor');
+  if (floorAppliedToActive) {
+    floorRow.style.display = '';
+    floorVal.textContent = `YES — bumped to hit ${floorPct}%`;
+  } else {
+    floorRow.style.display = 'none';
+  }
 }
 
 // ============================================
