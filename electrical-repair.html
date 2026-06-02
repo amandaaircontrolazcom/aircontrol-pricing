@@ -264,6 +264,18 @@
   }
   .gross-margin span.warn { color: var(--amber); }
   .gross-margin span.bad { color: #d4796b; }
+  .floor-banner {
+    background: rgba(212, 169, 96, 0.15);
+    border: 0.5px solid rgba(212, 169, 96, 0.5);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #f5f2ea;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .floor-banner strong { color: var(--amber); display: block; margin-bottom: 2px; }
+  .floor-banner .floor-detail { color: #d1cdc4; font-size: 11px; }
   .price-comparison {
     background: #232220;
     border-radius: 8px;
@@ -505,6 +517,11 @@
       Gross margin: <span id="sum-gross-margin">0%</span>
     </div>
 
+    <div class="floor-banner" id="floor-banner" style="display: none;">
+      <strong>⚠ Floor pricing applied</strong>
+      <span class="floor-detail">Price was raised to protect margin. Double-check labor hours and material cost.</span>
+    </div>
+
     <div class="empty-state" id="empty-state">
       Enter labor hours and material cost to see pricing.
     </div>
@@ -540,10 +557,6 @@
       <div class="breakdown-row">
         <span>Gross profit</span>
         <span class="breakdown-value" id="bd-profit">$0</span>
-      </div>
-      <div class="breakdown-row" id="floor-row" style="display: none;">
-        <span>Margin floor applied</span>
-        <span class="breakdown-value" id="bd-floor" style="color: var(--amber);">YES</span>
       </div>
       <div class="breakdown-row">
         <span>Raw margin</span>
@@ -713,8 +726,7 @@ function calc() {
     document.getElementById('bd-profit').textContent = '$0';
     document.getElementById('bd-raw-margin').textContent = '0%';
     document.getElementById('bd-margin').textContent = '0%';
-    const floorRow = document.getElementById('floor-row');
-    if (floorRow) floorRow.style.display = 'none';
+    document.getElementById('floor-banner').style.display = 'none';
     return;
   }
 
@@ -811,17 +823,11 @@ function calc() {
   document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
   document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
   // Update adjustment label to reflect actual values from Airtable
-  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(8) span:first-child');
+  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(7) span:first-child');
   if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
-  // Show floor indicator if floor was applied to the active price
-  const floorRow = document.getElementById('floor-row');
-  const floorVal = document.getElementById('bd-floor');
-  if (floorAppliedToActive) {
-    floorRow.style.display = '';
-    floorVal.textContent = `YES — bumped to hit ${floorPct}%`;
-  } else {
-    floorRow.style.display = 'none';
-  }
+  // Show floor banner if floor was applied to the active price (visible to everyone)
+  const floorBanner = document.getElementById('floor-banner');
+  floorBanner.style.display = floorAppliedToActive ? '' : 'none';
 }
 
 // ============================================
