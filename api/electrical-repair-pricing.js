@@ -11,6 +11,7 @@ const GLOBALS_MAP = {
   'Desired Margin %': 'margin-pct',
   'Comfort Club Discount %': 'cc-discount-pct',
   'Comfort Club Cap': 'cc-cap',
+  'Tech Commission %': 'commission-pct',
 };
 
 async function airtableFetch(path) {
