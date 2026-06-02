@@ -1,0 +1,6 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/electrical-repair", "destination": "/electrical-repair.html" }
+  ]
+}
