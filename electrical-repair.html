@@ -465,6 +465,20 @@
             <span class="input-affix input-suffix">%</span>
           </div>
         </div>
+        <div class="field">
+          <label class="label">Labor loading %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="labor-loading-pct" value="4" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Fudge factor %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="fudge-pct" value="5" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
       </div>
       <div class="hint">
         <strong style="color: var(--accent);">Display only.</strong>
@@ -521,7 +535,11 @@
         <span class="breakdown-value" id="bd-profit">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Gross margin</span>
+        <span>Raw margin</span>
+        <span class="breakdown-value" id="bd-raw-margin">0%</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Adjusted margin (−9%)</span>
         <span class="breakdown-value" id="bd-margin">0%</span>
       </div>
     </div>
@@ -665,6 +683,8 @@ function calc() {
   const ccDiscountPct = num('cc-discount-pct') || 10;
   const ccCap = num('cc-cap') || 100;
   const commissionPct = num('commission-pct') || 18;
+  const laborLoadingPct = num('labor-loading-pct') || 4;
+  const fudgePct = num('fudge-pct') || 5;
 
   // Empty state — show $0 until inputs filled
   if (hours <= 0 || materialCost <= 0) {
@@ -679,6 +699,7 @@ function calc() {
     document.getElementById('bd-commission').textContent = '$0';
     document.getElementById('bd-allin').textContent = '$0';
     document.getElementById('bd-profit').textContent = '$0';
+    document.getElementById('bd-raw-margin').textContent = '0%';
     document.getElementById('bd-margin').textContent = '0%';
     return;
   }
@@ -703,7 +724,10 @@ function calc() {
   // Gross profit = Price − Materials − Labor pay
   // Gross margin = Gross profit / Price
   const grossProfit = activePrice - materialCost - laborPay;
-  const grossMargin = activePrice > 0 ? (grossProfit / activePrice) * 100 : 0;
+  const rawGrossMargin = activePrice > 0 ? (grossProfit / activePrice) * 100 : 0;
+  // Adjusted margin for display = raw margin − labor loading % − fudge factor %
+  // This accounts for unitemized labor loading and small consumables/buffer.
+  const grossMargin = rawGrossMargin - laborLoadingPct - fudgePct;
 
   // Render
   document.getElementById('sum-total').textContent = fmt(activePrice);
@@ -740,7 +764,11 @@ function calc() {
   if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
   document.getElementById('bd-allin').textContent = fmt(activePrice);
   document.getElementById('bd-profit').textContent = fmt(grossProfit);
+  document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
   document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
+  // Update adjustment label to reflect actual values from Airtable
+  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(7) span:first-child');
+  if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
 }
 
 // ============================================
