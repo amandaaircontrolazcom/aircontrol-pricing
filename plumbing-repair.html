@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Plumbing Repair Calculator — Air Control</title>
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-alt: #ebe7dd;
+    --ink: #1a1916;
+    --ink-2: #4a4843;
+    --ink-3: #8a877f;
+    --ink-4: #b5b1a5;
+    --line: #d8d3c4;
+    --line-strong: #b5b1a5;
+    --accent: #c47e3a;
+    --good: #6a8e5c;
+    --bad: #9a1d1d;
+    --amber: #d4a960;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body:not(.admin) .admin-only { display: none !important; }
+
+  /* LOCK SCREEN */
+  .lock-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .lock-screen.hidden { display: none; }
+  .lock-card {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 12px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .lock-title { font-size: 11px; color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .lock-heading { font-size: 22px; font-weight: 500; margin-bottom: 24px; }
+  .lock-label { font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .lock-input {
+    width: 100%; padding: 12px 14px; font-size: 18px;
+    border: 0.5px solid var(--line-strong); border-radius: 6px;
+    background: var(--surface); font-family: var(--font-mono);
+    letter-spacing: 0.2em; text-align: center; margin-bottom: 16px;
+  }
+  .lock-input:focus { outline: none; border-color: var(--accent); }
+  .lock-btn {
+    width: 100%; padding: 12px; font-size: 14px; font-weight: 500;
+    background: var(--ink); color: var(--bg); border: none;
+    border-radius: 6px; cursor: pointer; letter-spacing: 0.04em;
+  }
+  .lock-btn:hover { background: #2a2825; }
+  .lock-error { font-size: 12px; color: var(--bad); margin-top: 8px; text-align: center; min-height: 16px; }
+  .lock-hint { font-size: 11px; color: var(--ink-3); text-align: center; margin-top: 18px; }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--line);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .home-btn {
+    font-size: 13px; color: var(--ink-2); background: none; border: none;
+    cursor: pointer; padding: 6px 10px; border-radius: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .home-btn:hover { background: var(--surface-alt); color: var(--ink); }
+  .calc-title { font-size: 16px; font-weight: 500; }
+  .calc-sub { font-size: 11px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; margin-left: 8px; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .role-pill {
+    font-size: 10px; padding: 4px 10px; border-radius: 11px;
+    background: var(--ink); color: var(--bg);
+    letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500;
+  }
+  .role-pill.estimator { background: var(--surface-alt); color: var(--ink-2); }
+  .user-name { font-size: 13px; color: var(--ink-2); }
+  .refresh-btn {
+    font-size: 16px; background: none; border: none; cursor: pointer;
+    color: var(--ink-3); padding: 4px 8px;
+  }
+  .refresh-btn:hover { color: var(--ink); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+  .workspace { display: flex; flex-direction: column; gap: 14px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .card-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .card-num { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
+  .card-meta { font-size: 11px; color: var(--ink-3); }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .label {
+    font-size: 11px; color: var(--ink-2);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 6px; display: block;
+  }
+  .label .req { color: var(--bad); margin-left: 2px; }
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 0.5px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+  input[type="number"] { text-align: right; font-family: var(--font-mono); }
+  input[type="number"][readonly], input[type="text"][readonly] {
+    background: var(--surface-alt); color: var(--ink-2);
+    cursor: not-allowed; border-color: var(--line);
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .input-with-prefix, .input-with-suffix {
+    position: relative; display: flex; align-items: stretch;
+  }
+  .input-with-prefix input { padding-left: 32px; }
+  .input-with-suffix input { padding-right: 42px; }
+  .input-affix {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--ink-3); font-family: var(--font-mono);
+    pointer-events: none;
+  }
+  .input-prefix { left: 12px; }
+  .input-suffix { right: 12px; }
+
+  /* CUSTOMER TYPE TOGGLE */
+  .cust-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: var(--surface-alt);
+    border: 0.5px solid var(--line);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .cust-opt {
+    padding: 12px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition: background 0.1s, color 0.1s;
+  }
+  .cust-opt:hover { color: var(--ink); }
+  .cust-opt.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .cust-opt-sub {
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    display: block;
+  }
+  .cust-opt.active .cust-opt-sub { color: var(--ink-2); }
+
+  /* PRICING CONFIG (admin only) */
+  .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    padding: 10px 12px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  .hint code {
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  /* SUMMARY PANEL */
+  .summary {
+    background: #1a1916;
+    color: #f5f2ea;
+    border-radius: 12px;
+    padding: 24px 22px;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+  .summary-label {
+    font-size: 11px;
+    color: #a8a399;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .summary-total {
+    font-size: 42px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .summary-sub {
+    font-size: 13px;
+    color: #d1cdc4;
+    margin-bottom: 18px;
+  }
+  .gross-margin {
+    font-size: 12px;
+    color: #a8a399;
+    letter-spacing: 0.04em;
+    margin-top: -12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 0.5px solid #3a3835;
+  }
+  .gross-margin span {
+    color: #6bbf8e;
+    font-weight: 500;
+    font-family: var(--font-mono);
+  }
+  .gross-margin span.warn { color: var(--amber); }
+  .gross-margin span.bad { color: #d4796b; }
+  .price-comparison {
+    background: #232220;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+  }
+  .price-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .price-row + .price-row { border-top: 0.5px solid #3a3835; }
+  .price-row-label { color: #a8a399; }
+  .price-row-label.active { color: #f5f2ea; font-weight: 500; }
+  .price-row-value { font-family: var(--font-mono); color: #d1cdc4; }
+  .price-row-value.active { color: #f5f2ea; font-weight: 500; }
+  .breakdown {
+    border-top: 0.5px solid #3a3835;
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .breakdown-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #d1cdc4;
+  }
+  .breakdown-row.total { font-weight: 500; color: #f5f2ea; padding-top: 8px; border-top: 0.5px solid #3a3835; margin-top: 4px; }
+  .breakdown-value { font-family: var(--font-mono); }
+
+  .empty-state {
+    background: rgba(196, 126, 58, 0.12);
+    border: 0.5px solid rgba(196, 126, 58, 0.3);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12px;
+    color: #d1cdc4;
+    margin-bottom: 18px;
+  }
+
+  .scope-note {
+    background: rgba(212, 169, 96, 0.15);
+    border: 0.5px solid rgba(212, 169, 96, 0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .scope-note strong { color: var(--ink); }
+
+  .loading-shade {
+    position: fixed; inset: 0;
+    background: rgba(245, 242, 234, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .loading-shade.hidden { display: none; }
+  .loading-text { font-size: 13px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-title">Air Control · Plumbing Repair</div>
+    <div class="lock-heading">Sign in</div>
+    <label class="lock-label" for="passcode-input">Personal passcode</label>
+    <input type="password" class="lock-input" id="passcode-input" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••" />
+    <button class="lock-btn" id="passcode-submit">Continue</button>
+    <div class="lock-error" id="lock-error"></div>
+    <div class="lock-hint">Enter the passcode assigned to you</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header" id="header" style="display: none;">
+  <div class="header-left">
+    <button class="home-btn" id="home-btn" title="Back to home">← Home</button>
+    <div>
+      <span class="calc-title">Plumbing Repair</span>
+      <span class="calc-sub">One-off pricing</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="refresh-btn admin-only" id="refresh-btn" title="Refresh pricing from Airtable">↻</button>
+    <span class="role-pill" id="role-pill">Admin</span>
+    <span class="user-name" id="user-name">—</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main" id="main" style="display: none;">
+
+  <div class="workspace">
+
+    <div class="scope-note">
+      <strong>Use this for one-off basic plumbing repairs only.</strong> Not for drains, repipes, customer-supplied materials, or high-labor jobs — those have separate pricing.
+    </div>
+
+    <!-- 01 JOB REFERENCE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">01</span>Job Reference</div>
+        <div class="card-meta">Optional</div>
+      </div>
+      <div class="field">
+        <label class="label">Reference</label>
+        <input type="text" id="job-ref" placeholder="e.g., Smith — replace kitchen faucet" />
+      </div>
+    </div>
+
+    <!-- 02 LABOR -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">02</span>Labor</div>
+        <div class="card-meta">Wrench time + testing + cleanup</div>
+      </div>
+      <div class="field">
+        <label class="label">Hours to complete <span class="req">*</span></label>
+        <div class="input-with-suffix">
+          <input type="number" id="labor-hours" min="0" step="0.25" placeholder="0" />
+          <span class="input-affix input-suffix">hrs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 MATERIAL -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">03</span>Material & Equipment</div>
+        <div class="card-meta">Direct cost to company</div>
+      </div>
+      <div class="field">
+        <label class="label">Total cost <span class="req">*</span></label>
+        <div class="input-with-prefix">
+          <span class="input-affix input-prefix">$</span>
+          <input type="number" id="material-cost" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 CUSTOMER TYPE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">04</span>Customer Type</div>
+      </div>
+      <div class="cust-toggle">
+        <div class="cust-opt active" data-cust="standard">Standard
+          <span class="cust-opt-sub">Non-member price</span>
+        </div>
+        <div class="cust-opt" data-cust="cc">Comfort Club
+          <span class="cust-opt-sub">Member base price</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 PRICING CONFIG (admin only) -->
+    <div class="card admin-only">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">05</span>Pricing Configuration</div>
+        <div class="card-meta">Read-only · edit in Airtable</div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field">
+          <label class="label">Break-Even ($/hr)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="break-even" value="500" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Desired margin %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="margin-pct" value="25" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Standard markup over CC %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="cc-discount-pct" value="10" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Standard markup cap</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="cc-cap" value="100" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Tech commission %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="commission-pct" value="18" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Labor loading %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="labor-loading-pct" value="4" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Fudge factor %</label>
+          <div class="input-with-suffix">
+            <input type="number" id="fudge-pct" value="5" readonly />
+            <span class="input-affix input-suffix">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="hint">
+        <strong style="color: var(--accent);">Display only.</strong>
+        These values reflect what's in Airtable. To change pricing, edit the
+        <code>Repair - Plumbing Globals</code> table in Airtable, then click ↻ above.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUMMARY -->
+  <aside class="summary">
+    <div class="summary-label">Quoted price</div>
+    <div class="summary-total" id="sum-total">$0</div>
+    <div class="summary-sub" id="sum-sub">Standard pricing</div>
+    <div class="gross-margin" id="gross-margin-line" style="display: none;">
+      Gross margin: <span id="sum-gross-margin">0%</span>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      Enter labor hours and material cost to see pricing.
+    </div>
+
+    <div class="price-comparison" id="price-comparison" style="display: none;">
+      <div class="price-row" id="row-standard">
+        <span class="price-row-label">Standard</span>
+        <span class="price-row-value" id="sum-standard">$0</span>
+      </div>
+      <div class="price-row" id="row-cc">
+        <span class="price-row-label">Comfort Club</span>
+        <span class="price-row-value" id="sum-cc">$0</span>
+      </div>
+    </div>
+
+    <div class="breakdown admin-only" id="breakdown">
+      <div class="breakdown-row">
+        <span>Break-even labor</span>
+        <span class="breakdown-value" id="bd-labor">$0</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Material cost</span>
+        <span class="breakdown-value" id="bd-material">$0</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Tech labor pay (18%)</span>
+        <span class="breakdown-value" id="bd-commission">$0</span>
+      </div>
+      <div class="breakdown-row total">
+        <span>Quoted price</span>
+        <span class="breakdown-value" id="bd-allin">$0</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Gross profit</span>
+        <span class="breakdown-value" id="bd-profit">$0</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Raw margin</span>
+        <span class="breakdown-value" id="bd-raw-margin">0%</span>
+      </div>
+      <div class="breakdown-row">
+        <span>Adjusted margin (−9%)</span>
+        <span class="breakdown-value" id="bd-margin">0%</span>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<!-- LOADING SHADE -->
+<div class="loading-shade hidden" id="loading-shade">
+  <div class="loading-text">Loading…</div>
+</div>
+
+<script>
+// ============================================
+// SESSION / AUTH
+// ============================================
+let currentUser = null;
+const CALC_KEY = 'Plumbing Repair';
+
+function restoreSession() {
+  try {
+    const stored = localStorage.getItem('aircontrol-pricing-user');
+    if (!stored) return false;
+    const user = JSON.parse(stored);
+    // Verify the user has access to this calculator (admin always, or has it in their list)
+    const isAdmin = user.role && user.role.toLowerCase() === 'admin';
+    const allowed = user.calculators || [];
+    if (!isAdmin && !allowed.includes(CALC_KEY)) {
+      // Logged in but no access — boot back to home
+      window.location.href = '/';
+      return true;
+    }
+    currentUser = user;
+    showCalc();
+    return true;
+  } catch (e) { return false; }
+}
+
+function saveSession(user) {
+  localStorage.setItem('aircontrol-pricing-user', JSON.stringify(user));
+}
+
+async function attemptLogin() {
+  const errorEl = document.getElementById('lock-error');
+  const inputEl = document.getElementById('passcode-input');
+  const passcode = inputEl.value.trim();
+  errorEl.textContent = '';
+  if (!passcode || passcode.length < 3) {
+    errorEl.textContent = 'Enter your passcode';
+    return;
+  }
+  document.getElementById('loading-shade').classList.remove('hidden');
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      errorEl.textContent = data.error || 'Invalid passcode';
+      return;
+    }
+    const isAdmin = data.user.role && data.user.role.toLowerCase() === 'admin';
+    const allowed = data.user.calculators || [];
+    if (!isAdmin && !allowed.includes(CALC_KEY)) {
+      errorEl.textContent = "You don't have access to this calculator";
+      return;
+    }
+    currentUser = data.user;
+    saveSession(currentUser);
+    showCalc();
+  } catch (err) {
+    errorEl.textContent = 'Sign-in failed. Try again.';
+    console.error(err);
+  } finally {
+    document.getElementById('loading-shade').classList.add('hidden');
+  }
+}
+
+function showCalc() {
+  document.getElementById('lock-screen').classList.add('hidden');
+  document.getElementById('header').style.display = '';
+  document.getElementById('main').style.display = '';
+  document.getElementById('user-name').textContent = currentUser.name;
+  const pill = document.getElementById('role-pill');
+  pill.textContent = currentUser.role;
+  pill.className = 'role-pill' + (currentUser.role.toLowerCase() === 'admin' ? '' : ' estimator');
+  if (currentUser.role.toLowerCase() === 'admin') {
+    document.body.classList.add('admin');
+  }
+  // Load pricing from Airtable
+  loadPricing();
+}
+
+// ============================================
+// PRICING FETCH FROM AIRTABLE
+// ============================================
+async function loadPricing() {
+  try {
+    const res = await fetch('/api/plumbing-repair-pricing');
+    if (!res.ok) {
+      console.warn('Could not load pricing, using defaults');
+      return;
+    }
+    const data = await res.json();
+    if (data.globals) {
+      Object.entries(data.globals).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val != null) el.value = val;
+      });
+    }
+    calc();
+  } catch (err) {
+    console.error('Pricing load error:', err);
+  }
+}
+
+// ============================================
+// MATH
+// ============================================
+function num(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(n) {
+  if (isNaN(n) || n == null) return '$0';
+  return '$' + Math.round(n).toLocaleString();
+}
+
+let activeCustType = 'standard';
+
+function calc() {
+  const hours = num('labor-hours');
+  const materialCost = num('material-cost');
+  const breakEven = num('break-even') || 500;
+  const marginPct = num('margin-pct') || 25;
+  const ccDiscountPct = num('cc-discount-pct') || 10;
+  const ccCap = num('cc-cap') || 100;
+  const commissionPct = num('commission-pct') || 18;
+  const laborLoadingPct = num('labor-loading-pct') || 4;
+  const fudgePct = num('fudge-pct') || 5;
+
+  // Empty state — show $0 until inputs filled
+  if (hours <= 0 || materialCost <= 0) {
+    document.getElementById('sum-total').textContent = '$0';
+    document.getElementById('sum-sub').textContent = activeCustType === 'cc' ? 'Comfort Club pricing' : 'Standard pricing';
+    document.getElementById('price-comparison').style.display = 'none';
+    document.getElementById('empty-state').style.display = '';
+    document.getElementById('gross-margin-line').style.display = 'none';
+    // Zero out admin breakdown too
+    document.getElementById('bd-labor').textContent = '$0';
+    document.getElementById('bd-material').textContent = '$0';
+    document.getElementById('bd-commission').textContent = '$0';
+    document.getElementById('bd-allin').textContent = '$0';
+    document.getElementById('bd-profit').textContent = '$0';
+    document.getElementById('bd-raw-margin').textContent = '0%';
+    document.getElementById('bd-margin').textContent = '0%';
+    return;
+  }
+
+  // Math
+  // CC is the base price (members get the lower price as ground floor).
+  // Standard = CC ÷ (1 − markup%) — so the markup% represents the discount CC saves off Standard.
+  // Markup amount is capped at the cap.
+  const breakEvenLabor = breakEven * hours;
+  const allInCost = breakEvenLabor + materialCost;
+  const marginFactor = 1 - (marginPct / 100);
+  const ccPrice = marginFactor > 0 ? allInCost / marginFactor : allInCost;
+
+  // Compute Standard as CC ÷ (1 - markup%) — capped: the markup AMOUNT can't exceed cap
+  const markupFactor = 1 - (ccDiscountPct / 100);
+  const standardUncapped = markupFactor > 0 ? ccPrice / markupFactor : ccPrice;
+  const standardMarkupRaw = standardUncapped - ccPrice;
+  const standardMarkup = Math.min(standardMarkupRaw, ccCap);
+  const standardPrice = ccPrice + standardMarkup;
+
+  // Active (quoted) price based on customer type
+  const activePrice = activeCustType === 'cc' ? ccPrice : standardPrice;
+
+  // Labor pay (tech commission) = % of the quoted price
+  const laborPay = activePrice * (commissionPct / 100);
+
+  // Gross profit = Price − Materials − Labor pay
+  // Gross margin = Gross profit / Price
+  const grossProfit = activePrice - materialCost - laborPay;
+  const rawGrossMargin = activePrice > 0 ? (grossProfit / activePrice) * 100 : 0;
+  // Adjusted margin for display = raw margin − labor loading % − fudge factor %
+  const grossMargin = rawGrossMargin - laborLoadingPct - fudgePct;
+
+  // Render
+  document.getElementById('sum-total').textContent = fmt(activePrice);
+  document.getElementById('sum-sub').textContent = activeCustType === 'cc' ? 'Comfort Club pricing' : 'Standard pricing';
+
+  // Gross margin line under the big price (visible to all roles)
+  const gmEl = document.getElementById('sum-gross-margin');
+  const gmLine = document.getElementById('gross-margin-line');
+  gmEl.textContent = grossMargin.toFixed(1) + '%';
+  gmEl.className = '';
+  if (grossMargin >= 50) gmEl.className = '';
+  else if (grossMargin >= 45) gmEl.className = 'warn';
+  else gmEl.className = 'bad';
+  gmLine.style.display = '';
+
+  document.getElementById('price-comparison').style.display = '';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('sum-standard').textContent = fmt(standardPrice);
+  document.getElementById('sum-cc').textContent = fmt(ccPrice);
+
+  // Highlight the active row in the comparison
+  document.getElementById('row-standard').querySelectorAll('.price-row-label, .price-row-value')
+    .forEach(el => el.classList.toggle('active', activeCustType === 'standard'));
+  document.getElementById('row-cc').querySelectorAll('.price-row-label, .price-row-value')
+    .forEach(el => el.classList.toggle('active', activeCustType === 'cc'));
+
+  // Admin breakdown
+  document.getElementById('bd-labor').textContent = fmt(breakEvenLabor);
+  document.getElementById('bd-material').textContent = fmt(materialCost);
+  document.getElementById('bd-commission').textContent = fmt(laborPay);
+  const commLabel = document.querySelector('#breakdown .breakdown-row:nth-child(3) span:first-child');
+  if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
+  document.getElementById('bd-allin').textContent = fmt(activePrice);
+  document.getElementById('bd-profit').textContent = fmt(grossProfit);
+  document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
+  document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
+  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(7) span:first-child');
+  if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
+}
+
+// ============================================
+// CUSTOMER TYPE TOGGLE
+// ============================================
+document.querySelectorAll('.cust-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.cust-opt').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    activeCustType = el.dataset.cust;
+    calc();
+  });
+});
+
+// ============================================
+// EVENT WIRING
+// ============================================
+document.getElementById('passcode-submit').addEventListener('click', attemptLogin);
+document.getElementById('passcode-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('home-btn').addEventListener('click', () => {
+  window.location.href = '/';
+});
+document.getElementById('refresh-btn').addEventListener('click', loadPricing);
+document.addEventListener('input', calc);
+document.addEventListener('change', calc);
+
+// On load
+if (!restoreSession()) {
+  document.getElementById('passcode-input').focus();
+}
+</script>
+
+</body>
+</html>
