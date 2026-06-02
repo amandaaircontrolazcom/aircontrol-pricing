@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Air Control — Pricing Tools</title>
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-alt: #ebe7dd;
+    --ink: #1a1916;
+    --ink-2: #4a4843;
+    --ink-3: #8a877f;
+    --ink-4: #b5b1a5;
+    --line: #d8d3c4;
+    --line-strong: #b5b1a5;
+    --accent: #c47e3a;
+    --good: #6a8e5c;
+    --bad: #9a1d1d;
+    --amber: #d4a960;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* LOCK SCREEN */
+  .lock-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .lock-screen.hidden { display: none; }
+  .lock-card {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 12px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .lock-title {
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .lock-heading {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+  .lock-label {
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .lock-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 18px;
+    border: 0.5px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    font-family: var(--font-mono);
+    letter-spacing: 0.2em;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .lock-input:focus { outline: none; border-color: var(--accent); }
+  .lock-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .lock-btn:hover { background: #2a2825; }
+  .lock-error {
+    font-size: 12px;
+    color: var(--bad);
+    margin-top: 8px;
+    text-align: center;
+    min-height: 16px;
+  }
+  .lock-hint {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-align: center;
+    margin-top: 18px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--line);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-brand {
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .brand-name {
+    font-size: 16px; font-weight: 500;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .role-pill {
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 11px;
+    background: var(--ink);
+    color: var(--bg);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .role-pill.estimator {
+    background: var(--surface-alt);
+    color: var(--ink-2);
+  }
+  .user-name {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .signout-link {
+    font-size: 13px;
+    color: var(--ink-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .signout-link:hover { color: var(--ink); }
+
+  /* MAIN */
+  .main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 28px;
+  }
+  .section-label {
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 700px) {
+    .tile-grid { grid-template-columns: 1fr; }
+  }
+  .tile {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.05s;
+    display: flex; flex-direction: column;
+  }
+  .tile:hover {
+    border-color: var(--ink-3);
+  }
+  .tile:active {
+    transform: scale(0.99);
+  }
+  .tile.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--surface-alt);
+  }
+  .tile.disabled:hover {
+    border-color: var(--line);
+  }
+  .tile-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .tile-icon {
+    width: 36px; height: 36px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tile-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .tile-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    flex: 1;
+    margin-bottom: 12px;
+  }
+  .tile-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12px;
+  }
+  .tile-status {
+    color: var(--ink-3);
+  }
+  .tile-action {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .tile.disabled .tile-action {
+    color: var(--ink-4);
+  }
+  .admin-tile {
+    border: 0.5px solid var(--accent);
+    background: var(--surface);
+  }
+
+  .loading-shade {
+    position: fixed; inset: 0;
+    background: rgba(245, 242, 234, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .loading-shade.hidden { display: none; }
+  .loading-text {
+    font-size: 13px;
+    color: var(--ink-3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-title">Air Control</div>
+    <div class="lock-heading">Sign in</div>
+    <label class="lock-label" for="passcode-input">Personal passcode</label>
+    <input type="password" class="lock-input" id="passcode-input" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••" />
+    <button class="lock-btn" id="passcode-submit">Continue</button>
+    <div class="lock-error" id="lock-error"></div>
+    <div class="lock-hint">Enter the passcode assigned to you</div>
+  </div>
+</div>
+
+<!-- HEADER (shown after login) -->
+<header class="header" id="header" style="display: none;">
+  <div class="header-brand">
+    <div class="brand-name">Air Control</div>
+    <div class="brand-sub">Pricing Tools</div>
+  </div>
+  <div class="header-right">
+    <span class="role-pill" id="role-pill">Admin</span>
+    <span class="user-name" id="user-name">—</span>
+    <button class="signout-link" id="signout-btn">Sign out</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main" id="main" style="display: none;">
+  <div class="section-label">Your calculators</div>
+  <div class="tile-grid" id="tile-grid">
+    <!-- Tiles rendered by JS -->
+  </div>
+</main>
+
+<!-- LOADING SHADE -->
+<div class="loading-shade hidden" id="loading-shade">
+  <div class="loading-text">Loading…</div>
+</div>
+
+<script>
+// ============================================
+// CALCULATOR DEFINITIONS
+// Each calc has a key (matches Airtable Calculators multi-select option)
+// and a URL where it lives. URLs can be external (e.g., panel calc on its
+// existing Vercel project) or routes inside this app.
+// ============================================
+const CALCULATORS = {
+  'Panel': {
+    name: 'Panel Calculator',
+    desc: 'Electrical panel replacements, service upgrades, subpanels',
+    icon: '⚡',
+    url: 'https://panel-calculator-five.vercel.app',
+    available: true,
+  },
+  'Electrical Repair': {
+    name: 'Electrical Repair',
+    desc: 'Outlets, switches, troubleshooting, small repairs',
+    icon: '🔧',
+    url: '/electrical-repair',
+    available: false,
+    statusText: 'Coming soon',
+  },
+  'Plumbing Repair': {
+    name: 'Plumbing Repair',
+    desc: 'Leak repair, fixture replacement, drain clears',
+    icon: '💧',
+    url: '/plumbing-repair',
+    available: false,
+    statusText: 'Coming soon',
+  },
+  'HVAC Install': {
+    name: 'HVAC Install',
+    desc: 'New systems, full replacements, ductwork',
+    icon: '❄️',
+    url: '/hvac-install',
+    available: false,
+    statusText: 'Coming soon',
+  },
+  'Service Repair': {
+    name: 'Service Repair',
+    desc: 'General service calls, diagnostics, misc work',
+    icon: '🛠️',
+    url: '/service-repair',
+    available: false,
+    statusText: 'Coming soon',
+  },
+};
+
+// ============================================
+// AUTH STATE
+// ============================================
+let currentUser = null;
+
+// Try to restore an existing session from localStorage
+function restoreSession() {
+  try {
+    const stored = localStorage.getItem('aircontrol-pricing-user');
+    if (stored) {
+      currentUser = JSON.parse(stored);
+      showHome();
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function saveSession(user) {
+  localStorage.setItem('aircontrol-pricing-user', JSON.stringify(user));
+}
+
+function clearSession() {
+  localStorage.removeItem('aircontrol-pricing-user');
+  currentUser = null;
+}
+
+// ============================================
+// LOGIN FLOW
+// ============================================
+async function attemptLogin() {
+  const errorEl = document.getElementById('lock-error');
+  const inputEl = document.getElementById('passcode-input');
+  const passcode = inputEl.value.trim();
+
+  errorEl.textContent = '';
+
+  if (!passcode || passcode.length < 3) {
+    errorEl.textContent = 'Enter your passcode';
+    return;
+  }
+
+  // Show loading
+  document.getElementById('loading-shade').classList.remove('hidden');
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      errorEl.textContent = data.error || 'Invalid passcode';
+      document.getElementById('loading-shade').classList.add('hidden');
+      return;
+    }
+
+    currentUser = data.user;
+    saveSession(currentUser);
+    showHome();
+  } catch (err) {
+    errorEl.textContent = 'Sign-in failed. Try again.';
+    console.error(err);
+  } finally {
+    document.getElementById('loading-shade').classList.add('hidden');
+  }
+}
+
+function showHome() {
+  document.getElementById('lock-screen').classList.add('hidden');
+  document.getElementById('header').style.display = '';
+  document.getElementById('main').style.display = '';
+
+  // Header
+  document.getElementById('user-name').textContent = currentUser.name;
+  const pill = document.getElementById('role-pill');
+  pill.textContent = currentUser.role;
+  pill.className = 'role-pill' + (currentUser.role.toLowerCase() === 'admin' ? '' : ' estimator');
+
+  renderTiles();
+}
+
+function signOut() {
+  clearSession();
+  document.getElementById('lock-screen').classList.remove('hidden');
+  document.getElementById('header').style.display = 'none';
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('passcode-input').value = '';
+}
+
+// ============================================
+// TILE RENDERING
+// ============================================
+function renderTiles() {
+  const grid = document.getElementById('tile-grid');
+  const isAdmin = currentUser.role.toLowerCase() === 'admin';
+  const allowed = new Set(currentUser.calculators || []);
+
+  const tiles = [];
+
+  // Calculator tiles (in defined order)
+  Object.entries(CALCULATORS).forEach(([key, c]) => {
+    // Only show if user has access (admin sees all)
+    if (!isAdmin && !allowed.has(key)) return;
+    tiles.push(buildCalcTile(key, c));
+  });
+
+  // User Management tile — admin only
+  if (isAdmin) {
+    tiles.push(`
+      <div class="tile admin-tile" data-action="users">
+        <div class="tile-head">
+          <div class="tile-icon">👥</div>
+          <div class="tile-name">User Management</div>
+        </div>
+        <div class="tile-desc">Add users, set permissions, manage access codes</div>
+        <div class="tile-foot">
+          <span class="tile-status">Admin only</span>
+          <span class="tile-action">Open →</span>
+        </div>
+      </div>
+    `);
+  }
+
+  grid.innerHTML = tiles.join('');
+
+  // Wire click handlers
+  grid.querySelectorAll('.tile').forEach(tileEl => {
+    if (tileEl.classList.contains('disabled')) return;
+    tileEl.addEventListener('click', () => {
+      const action = tileEl.dataset.action;
+      const url = tileEl.dataset.url;
+      if (action === 'users') {
+        alert('User Management coming soon. For now, edit the Users table directly in Airtable.');
+        return;
+      }
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  });
+}
+
+function buildCalcTile(key, c) {
+  const disabled = !c.available;
+  const status = c.available ? '' : (c.statusText || 'Coming soon');
+  return `
+    <div class="tile ${disabled ? 'disabled' : ''}" ${disabled ? '' : `data-url="${c.url}"`}>
+      <div class="tile-head">
+        <div class="tile-icon">${c.icon}</div>
+        <div class="tile-name">${c.name}</div>
+      </div>
+      <div class="tile-desc">${c.desc}</div>
+      <div class="tile-foot">
+        <span class="tile-status">${status}</span>
+        <span class="tile-action">${disabled ? 'Locked' : 'Open →'}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================
+// EVENT WIRING
+// ============================================
+document.getElementById('passcode-submit').addEventListener('click', attemptLogin);
+document.getElementById('passcode-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('signout-btn').addEventListener('click', signOut);
+
+// On load: try to restore previous session
+if (!restoreSession()) {
+  // Otherwise just show the lock screen (default state)
+  document.getElementById('passcode-input').focus();
+}
+</script>
+
+</body>
+</html>
