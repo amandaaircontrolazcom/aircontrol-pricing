@@ -415,10 +415,10 @@
       </div>
       <div class="cust-toggle">
         <div class="cust-opt active" data-cust="standard">Standard
-          <span class="cust-opt-sub">Regular customer</span>
+          <span class="cust-opt-sub">Non-member price</span>
         </div>
         <div class="cust-opt" data-cust="cc">Comfort Club
-          <span class="cust-opt-sub">10% off · capped at $100</span>
+          <span class="cust-opt-sub">Member base price</span>
         </div>
       </div>
     </div>
@@ -445,14 +445,14 @@
           </div>
         </div>
         <div class="field">
-          <label class="label">Comfort Club discount %</label>
+          <label class="label">Standard markup over CC %</label>
           <div class="input-with-suffix">
             <input type="number" id="cc-discount-pct" value="10" readonly />
             <span class="input-affix input-suffix">%</span>
           </div>
         </div>
         <div class="field">
-          <label class="label">Comfort Club cap</label>
+          <label class="label">Standard markup cap</label>
           <div class="input-with-prefix">
             <span class="input-affix input-prefix">$</span>
             <input type="number" id="cc-cap" value="100" readonly />
@@ -705,15 +705,17 @@ function calc() {
   }
 
   // Math
+  // CC is the base price (members get the lower price as ground floor).
+  // Standard is CC + a markup capped at the CC cap.
   const breakEvenLabor = breakEven * hours;
   const allInCost = breakEvenLabor + materialCost;
   const marginFactor = 1 - (marginPct / 100);
-  const standardPrice = marginFactor > 0 ? allInCost / marginFactor : allInCost;
+  const ccPrice = marginFactor > 0 ? allInCost / marginFactor : allInCost;
 
-  // Comfort Club: discount %, capped
-  const ccDiscountRaw = standardPrice * (ccDiscountPct / 100);
-  const ccDiscount = Math.min(ccDiscountRaw, ccCap);
-  const ccPrice = standardPrice - ccDiscount;
+  // Standard = CC + min(CC × markup%, cap)
+  const standardMarkupRaw = ccPrice * (ccDiscountPct / 100);
+  const standardMarkup = Math.min(standardMarkupRaw, ccCap);
+  const standardPrice = ccPrice + standardMarkup;
 
   // Active (quoted) price based on customer type
   const activePrice = activeCustType === 'cc' ? ccPrice : standardPrice;
