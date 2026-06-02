@@ -1,0 +1,8 @@
+{
+  "name": "aircontrol-pricing",
+  "version": "1.0.0",
+  "description": "Air Control pricing tools — home page and calculator launcher",
+  "engines": {
+    "node": ">=18"
+  }
+}
