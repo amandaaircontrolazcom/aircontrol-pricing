@@ -14,6 +14,7 @@ const GLOBALS_MAP = {
   'Tech Commission %': 'commission-pct',
   'Labor Loading %': 'labor-loading-pct',
   'Fudge Factor %': 'fudge-pct',
+  'Min Margin Floor %': 'floor-pct',
 };
 
 async function airtableFetch(path) {
