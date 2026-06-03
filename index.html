@@ -482,14 +482,27 @@ function renderTiles() {
     if (tileEl.classList.contains('disabled')) return;
     tileEl.addEventListener('click', () => {
       const action = tileEl.dataset.action;
-      const url = tileEl.dataset.url;
+      let url = tileEl.dataset.url;
       if (action === 'users') {
         alert('User Management coming soon. For now, edit the Users table directly in Airtable.');
         return;
       }
-      if (url) {
-        window.location.href = url;
+      if (!url) return;
+      // For external calculator URLs (e.g., the panel calc), append a sso token
+      // so the user doesn't have to re-authenticate. This is a passive convenience
+      // pass — the target calc still validates that the user has access.
+      const isExternal = url.startsWith('http');
+      if (isExternal && currentUser) {
+        const token = btoa(JSON.stringify({
+          name: currentUser.name,
+          role: currentUser.role,
+          // Short expiry so token can't be reused indefinitely
+          exp: Date.now() + 1000 * 60 * 60 * 2, // 2 hours
+        }));
+        const sep = url.includes('?') ? '&' : '?';
+        url = `${url}${sep}sso=${encodeURIComponent(token)}`;
       }
+      window.location.href = url;
     });
   });
 }
