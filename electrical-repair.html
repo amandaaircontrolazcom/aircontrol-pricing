@@ -547,7 +547,7 @@
         <span class="breakdown-value" id="bd-material">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Tech labor pay (18%)</span>
+        <span id="bd-commission-label">Tech labor pay</span>
         <span class="breakdown-value" id="bd-commission">$0</span>
       </div>
       <div class="breakdown-row total">
@@ -563,7 +563,7 @@
         <span class="breakdown-value" id="bd-raw-margin">0%</span>
       </div>
       <div class="breakdown-row">
-        <span>Adjusted margin (−9%)</span>
+        <span id="bd-margin-label">Adjusted margin</span>
         <span class="breakdown-value" id="bd-margin">0%</span>
       </div>
     </div>
@@ -815,15 +815,14 @@ function calc() {
   document.getElementById('bd-labor').textContent = fmt(breakEvenLabor);
   document.getElementById('bd-material').textContent = fmt(materialCost);
   document.getElementById('bd-commission').textContent = fmt(laborPay);
-  // Update commission label to show actual %
-  const commLabel = document.querySelector('#breakdown .breakdown-row:nth-child(3) span:first-child');
-  if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
   document.getElementById('bd-allin').textContent = fmt(activePrice);
   document.getElementById('bd-profit').textContent = fmt(grossProfit);
   document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
   document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
-  // Update adjustment label to reflect actual values from Airtable
-  const adjLabel = document.querySelector('#breakdown .breakdown-row:nth-child(7) span:first-child');
+  // Update dynamic labels with current Airtable values
+  const commLabel = document.getElementById('bd-commission-label');
+  if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
+  const adjLabel = document.getElementById('bd-margin-label');
   if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
   // Show floor banner if floor was applied to the active price (visible to everyone)
   const floorBanner = document.getElementById('floor-banner');
