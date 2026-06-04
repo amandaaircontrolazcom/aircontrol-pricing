@@ -269,6 +269,16 @@
     padding: 14px 16px;
     margin-bottom: 14px;
   }
+  .section-header {
+    font-size: 10px;
+    color: #a8a399;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 0.5px solid #3a3835;
+  }
   .price-row {
     display: flex; justify-content: space-between; align-items: baseline;
     padding: 6px 0;
@@ -545,7 +555,7 @@
 
   <!-- SUMMARY -->
   <aside class="summary">
-    <div class="summary-label">Annual Comfort Club price</div>
+    <div class="summary-label">Annual prepaid price</div>
     <div class="summary-total" id="sum-total">$0</div>
     <div class="summary-sub" id="sum-sub">Commercial maintenance</div>
 
@@ -553,26 +563,29 @@
       Enter equipment counts and filter info to see pricing.
     </div>
 
-    <div class="price-breakdown" id="price-breakdown" style="display: none;">
-      <div class="price-row">
-        <span class="price-row-label" id="row1-label">With filter changes at maintenance</span>
-        <span class="price-row-value" id="sum-base">$0</span>
+    <!-- SECTION 1: ANNUAL PREPAID -->
+    <div class="price-breakdown" id="prepaid-section" style="display: none;">
+      <div class="section-header">Annual prepaid</div>
+      <div class="price-row" id="row-prepaid-base">
+        <span class="price-row-label" id="row-prepaid-base-label">With filter changes at maintenance</span>
+        <span class="price-row-value" id="sum-prepaid-base">$0</span>
       </div>
-      <div class="price-row" id="row-with-standalone" style="display: none;">
+      <div class="price-row" id="row-prepaid-standalone" style="display: none;">
         <span class="price-row-label">With standalone filter changes</span>
-        <span class="price-row-value" id="sum-with-standalone">$0</span>
+        <span class="price-row-value" id="sum-prepaid-standalone">$0</span>
       </div>
     </div>
 
-    <div class="pay-section" id="pay-section" style="display: none;">
-      <div class="pay-section-label">Pay schedule (per visit)</div>
-      <div class="pay-row">
-        <span>Per maintenance visit</span>
-        <strong id="pay-visit">$0</strong>
+    <!-- SECTION 2: PAY PER VISIT -->
+    <div class="price-breakdown" id="pervisit-section" style="display: none; margin-top: 14px;">
+      <div class="section-header">Pay per visit</div>
+      <div class="price-row" id="row-pervisit-base">
+        <span class="price-row-label">Per maintenance visit</span>
+        <span class="price-row-value" id="sum-pervisit-base">$0</span>
       </div>
-      <div class="pay-row" id="pay-filter-row" style="display: none;">
-        <span>Per standalone filter change</span>
-        <strong id="pay-filter">$0</strong>
+      <div class="price-row" id="row-pervisit-filter" style="display: none;">
+        <span class="price-row-label">Per standalone filter change</span>
+        <span class="price-row-value" id="sum-pervisit-filter">$0</span>
       </div>
     </div>
   </aside>
@@ -789,28 +802,30 @@ function calcCommercial() {
   const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
   document.getElementById('sum-total').textContent = fmt(activeTotal);
   document.getElementById('sum-sub').textContent = 'Commercial maintenance';
-  document.getElementById('row1-label').textContent = 'With filter changes at maintenance';
-  document.getElementById('sum-base').textContent = fmt(totalBase);
-  document.getElementById('price-breakdown').style.display = '';
   document.getElementById('empty-state').style.display = 'none';
 
+  // SECTION 1: Annual prepaid
+  document.getElementById('prepaid-section').style.display = '';
+  document.getElementById('row-prepaid-base-label').textContent =
+    filtersPerVisit > 0 ? 'With filter changes at maintenance' : 'Without filter changes';
+  document.getElementById('sum-prepaid-base').textContent = fmt(totalBase);
   if (standaloneChanges > 0) {
-    document.getElementById('row-with-standalone').style.display = '';
-    document.getElementById('sum-with-standalone').textContent = fmt(totalWithStandalone);
+    document.getElementById('row-prepaid-standalone').style.display = '';
+    document.getElementById('sum-prepaid-standalone').textContent = fmt(totalWithStandalone);
   } else {
-    document.getElementById('row-with-standalone').style.display = 'none';
+    document.getElementById('row-prepaid-standalone').style.display = 'none';
   }
 
-  // Pay schedule
-  document.getElementById('pay-section').style.display = '';
+  // SECTION 2: Pay per visit
+  document.getElementById('pervisit-section').style.display = '';
   const payPerVisit = totalBase / 2; // 2 visits per year
-  document.getElementById('pay-visit').textContent = fmt(payPerVisit);
+  document.getElementById('sum-pervisit-base').textContent = fmt(payPerVisit);
   if (standaloneChanges > 0) {
     const payPerFilterChange = (totalWithStandalone - totalBase) / standaloneChanges;
-    document.getElementById('pay-filter-row').style.display = '';
-    document.getElementById('pay-filter').textContent = fmt(payPerFilterChange);
+    document.getElementById('row-pervisit-filter').style.display = '';
+    document.getElementById('sum-pervisit-filter').textContent = fmt(payPerFilterChange);
   } else {
-    document.getElementById('pay-filter-row').style.display = 'none';
+    document.getElementById('row-pervisit-filter').style.display = 'none';
   }
 }
 
@@ -858,36 +873,38 @@ function calcVrf() {
   const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
   document.getElementById('sum-total').textContent = fmt(activeTotal);
   document.getElementById('sum-sub').textContent = 'VRF maintenance';
-  document.getElementById('row1-label').textContent = filtersPerVisit > 0 ? 'With filter changes' : 'No filter changes';
-  document.getElementById('sum-base').textContent = fmt(totalBase);
-  document.getElementById('price-breakdown').style.display = '';
   document.getElementById('empty-state').style.display = 'none';
 
+  // SECTION 1: Annual prepaid
+  document.getElementById('prepaid-section').style.display = '';
+  document.getElementById('row-prepaid-base-label').textContent =
+    filtersPerVisit > 0 ? 'With filter changes at maintenance' : 'Without filter changes';
+  document.getElementById('sum-prepaid-base').textContent = fmt(totalBase);
   if (standaloneChanges > 0) {
-    document.getElementById('row-with-standalone').style.display = '';
-    document.getElementById('sum-with-standalone').textContent = fmt(totalWithStandalone);
+    document.getElementById('row-prepaid-standalone').style.display = '';
+    document.getElementById('sum-prepaid-standalone').textContent = fmt(totalWithStandalone);
   } else {
-    document.getElementById('row-with-standalone').style.display = 'none';
+    document.getElementById('row-prepaid-standalone').style.display = 'none';
   }
 
-  // Pay schedule
-  document.getElementById('pay-section').style.display = '';
+  // SECTION 2: Pay per visit
+  document.getElementById('pervisit-section').style.display = '';
   const payPerVisit = totalBase / 2;
-  document.getElementById('pay-visit').textContent = fmt(payPerVisit);
+  document.getElementById('sum-pervisit-base').textContent = fmt(payPerVisit);
   if (standaloneChanges > 0) {
     const payPerFilterChange = (totalWithStandalone - totalBase) / standaloneChanges;
-    document.getElementById('pay-filter-row').style.display = '';
-    document.getElementById('pay-filter').textContent = fmt(payPerFilterChange);
+    document.getElementById('row-pervisit-filter').style.display = '';
+    document.getElementById('sum-pervisit-filter').textContent = fmt(payPerFilterChange);
   } else {
-    document.getElementById('pay-filter-row').style.display = 'none';
+    document.getElementById('row-pervisit-filter').style.display = 'none';
   }
 }
 
 function resetSummary(subtitle) {
   document.getElementById('sum-total').textContent = '$0';
   document.getElementById('sum-sub').textContent = subtitle;
-  document.getElementById('price-breakdown').style.display = 'none';
-  document.getElementById('pay-section').style.display = 'none';
+  document.getElementById('prepaid-section').style.display = 'none';
+  document.getElementById('pervisit-section').style.display = 'none';
   document.getElementById('empty-state').style.display = '';
 }
 
