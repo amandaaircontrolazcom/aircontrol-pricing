@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Commercial & VRF Maintenance Calculator — Air Control</title>
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-alt: #ebe7dd;
+    --ink: #1a1916;
+    --ink-2: #4a4843;
+    --ink-3: #8a877f;
+    --ink-4: #b5b1a5;
+    --line: #d8d3c4;
+    --line-strong: #b5b1a5;
+    --accent: #c47e3a;
+    --good: #6a8e5c;
+    --bad: #9a1d1d;
+    --amber: #d4a960;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body:not(.admin) .admin-only { display: none !important; }
+
+  /* LOCK SCREEN */
+  .lock-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .lock-screen.hidden { display: none; }
+  .lock-card {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 12px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .lock-title { font-size: 11px; color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .lock-heading { font-size: 22px; font-weight: 500; margin-bottom: 24px; }
+  .lock-label { font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .lock-input {
+    width: 100%; padding: 12px 14px; font-size: 18px;
+    border: 0.5px solid var(--line-strong); border-radius: 6px;
+    background: var(--surface); font-family: var(--font-mono);
+    letter-spacing: 0.2em; text-align: center; margin-bottom: 16px;
+  }
+  .lock-input:focus { outline: none; border-color: var(--accent); }
+  .lock-btn {
+    width: 100%; padding: 12px; font-size: 14px; font-weight: 500;
+    background: var(--ink); color: var(--bg); border: none;
+    border-radius: 6px; cursor: pointer; letter-spacing: 0.04em;
+  }
+  .lock-btn:hover { background: #2a2825; }
+  .lock-error { font-size: 12px; color: var(--bad); margin-top: 8px; text-align: center; min-height: 16px; }
+  .lock-hint { font-size: 11px; color: var(--ink-3); text-align: center; margin-top: 18px; }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--line);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .home-btn {
+    font-size: 13px; color: var(--ink-2); background: none; border: none;
+    cursor: pointer; padding: 6px 10px; border-radius: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .home-btn:hover { background: var(--surface-alt); color: var(--ink); }
+  .calc-title { font-size: 16px; font-weight: 500; }
+  .calc-sub { font-size: 11px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; margin-left: 8px; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .role-pill {
+    font-size: 10px; padding: 4px 10px; border-radius: 11px;
+    background: var(--ink); color: var(--bg);
+    letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500;
+  }
+  .role-pill.estimator { background: var(--surface-alt); color: var(--ink-2); }
+  .user-name { font-size: 13px; color: var(--ink-2); }
+  .refresh-btn {
+    font-size: 16px; background: none; border: none; cursor: pointer;
+    color: var(--ink-3); padding: 4px 8px;
+  }
+  .refresh-btn:hover { color: var(--ink); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+  .workspace { display: flex; flex-direction: column; gap: 14px; }
+
+  /* MODE TOGGLE (Commercial vs VRF) */
+  .mode-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: var(--surface-alt);
+    border: 0.5px solid var(--line);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 8px;
+  }
+  .mode-opt {
+    padding: 14px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition: background 0.1s, color 0.1s;
+  }
+  .mode-opt:hover { color: var(--ink); }
+  .mode-opt.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .mode-opt-sub {
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    display: block;
+  }
+  .mode-opt.active .mode-opt-sub { color: var(--ink-2); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card.hidden { display: none; }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .card-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .card-num { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
+  .card-meta { font-size: 11px; color: var(--ink-3); }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .label {
+    font-size: 11px; color: var(--ink-2);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 6px; display: block;
+  }
+  .label .req { color: var(--bad); margin-left: 2px; }
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 0.5px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+  input[type="number"] { text-align: right; font-family: var(--font-mono); }
+  input[type="number"][readonly], input[type="text"][readonly] {
+    background: var(--surface-alt); color: var(--ink-2);
+    cursor: not-allowed; border-color: var(--line);
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .input-with-prefix, .input-with-suffix {
+    position: relative; display: flex; align-items: stretch;
+  }
+  .input-with-prefix input { padding-left: 32px; }
+  .input-with-suffix input { padding-right: 42px; }
+  .input-affix {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--ink-3); font-family: var(--font-mono);
+    pointer-events: none;
+  }
+  .input-prefix { left: 12px; }
+  .input-suffix { right: 12px; }
+
+  .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  .scope-note {
+    background: rgba(212, 169, 96, 0.15);
+    border: 0.5px solid rgba(212, 169, 96, 0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  .scope-note strong { color: var(--ink); }
+
+  .hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    padding: 10px 12px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  .hint code {
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  /* SUMMARY PANEL */
+  .summary {
+    background: #1a1916;
+    color: #f5f2ea;
+    border-radius: 12px;
+    padding: 24px 22px;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+  .summary-label {
+    font-size: 11px;
+    color: #a8a399;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .summary-total {
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .summary-sub {
+    font-size: 13px;
+    color: #d1cdc4;
+    margin-bottom: 18px;
+  }
+  .price-breakdown {
+    background: #232220;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .price-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .price-row + .price-row { border-top: 0.5px solid #3a3835; }
+  .price-row-label { color: #d1cdc4; }
+  .price-row-value { font-family: var(--font-mono); color: #f5f2ea; font-weight: 500; }
+
+  .pay-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 0.5px solid #3a3835;
+  }
+  .pay-section-label {
+    font-size: 11px; color: #a8a399;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .pay-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #d1cdc4;
+  }
+  .pay-row strong { color: #f5f2ea; font-family: var(--font-mono); font-weight: 500; }
+
+  .empty-state {
+    background: rgba(196, 126, 58, 0.12);
+    border: 0.5px solid rgba(196, 126, 58, 0.3);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12px;
+    color: #d1cdc4;
+    margin-bottom: 18px;
+  }
+
+  .loading-shade {
+    position: fixed; inset: 0;
+    background: rgba(245, 242, 234, 0.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .loading-shade.hidden { display: none; }
+  .loading-text { font-size: 13px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-title">Air Control · Commercial & VRF</div>
+    <div class="lock-heading">Sign in</div>
+    <label class="lock-label" for="passcode-input">Personal passcode</label>
+    <input type="password" class="lock-input" id="passcode-input" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••" />
+    <button class="lock-btn" id="passcode-submit">Continue</button>
+    <div class="lock-error" id="lock-error"></div>
+    <div class="lock-hint">Enter the passcode assigned to you</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header" id="header" style="display: none;">
+  <div class="header-left">
+    <button class="home-btn" id="home-btn" title="Back to home">← Home</button>
+    <div>
+      <span class="calc-title">Commercial & VRF</span>
+      <span class="calc-sub">Maintenance pricing</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="refresh-btn admin-only" id="refresh-btn" title="Refresh pricing from Airtable">↻</button>
+    <span class="role-pill" id="role-pill">Admin</span>
+    <span class="user-name" id="user-name">—</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main" id="main" style="display: none;">
+
+  <div class="workspace">
+
+    <div class="scope-note">
+      <strong>Use this for Commercial and VRF maintenance pricing.</strong> Comfort Club pricing only — non-member pricing is not currently supported.
+    </div>
+
+    <!-- 01 MODE TOGGLE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">01</span>Maintenance Type</div>
+      </div>
+      <div class="mode-toggle">
+        <div class="mode-opt active" data-mode="commercial">Commercial
+          <span class="mode-opt-sub">RTU systems by tonnage</span>
+        </div>
+        <div class="mode-opt" data-mode="vrf">VRF
+          <span class="mode-opt-sub">VRF · Air handlers · ERVs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 JOB REFERENCE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">02</span>Job Reference</div>
+        <div class="card-meta">Optional</div>
+      </div>
+      <div class="field">
+        <label class="label">Reference</label>
+        <input type="text" id="job-ref" placeholder="e.g., ABC Office Park — annual maintenance" />
+      </div>
+    </div>
+
+    <!-- 03 COMMERCIAL SYSTEMS -->
+    <div class="card" id="card-commercial-systems">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">03</span>Systems by Tonnage</div>
+        <div class="card-meta">Count of units to maintain</div>
+      </div>
+      <div class="field-grid-3">
+        <div class="field">
+          <label class="label">5 tons & under</label>
+          <input type="number" id="comm-small" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="label">6 to 10 tons</label>
+          <input type="number" id="comm-medium" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="label">Over 10 tons</label>
+          <input type="number" id="comm-large" min="0" step="1" placeholder="0" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 VRF SYSTEMS (alternate) -->
+    <div class="card hidden" id="card-vrf-systems">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">03</span>VRF Equipment</div>
+        <div class="card-meta">Counts of each unit type</div>
+      </div>
+      <div class="field-grid-3">
+        <div class="field">
+          <label class="label">Standard systems</label>
+          <input type="number" id="vrf-standard" min="0" step="1" placeholder="0" />
+          <div style="font-size: 10px; color: var(--ink-3); margin-top: 4px; font-style: italic;">Includes standard ductless systems</div>
+        </div>
+        <div class="field">
+          <label class="label">VRF air handlers</label>
+          <input type="number" id="vrf-handlers" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="label">ERVs</label>
+          <input type="number" id="vrf-ervs" min="0" step="1" placeholder="0" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 FILTERS -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">04</span>Filters</div>
+        <div class="card-meta">Filter changes & cost</div>
+      </div>
+      <div class="field-grid-2">
+        <div class="field">
+          <label class="label">Filters changed per visit</label>
+          <input type="number" id="filters-per-visit" min="0" step="1" placeholder="0" />
+        </div>
+        <div class="field">
+          <label class="label">Standalone filter changes (extra visits per year)</label>
+          <input type="number" id="standalone-changes" min="0" step="1" placeholder="0" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Total filter cost for a single visit</label>
+        <div class="input-with-prefix">
+          <span class="input-affix input-prefix">$</span>
+          <input type="number" id="filter-cost" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 05 PRICING CONFIG (admin only) -->
+    <div class="card admin-only">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">05</span>Pricing Configuration</div>
+        <div class="card-meta">Read-only · edit in Airtable</div>
+      </div>
+      <p style="font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px;">Commercial rates (× 2 visits per year)</p>
+      <div class="field-grid-3">
+        <div class="field">
+          <label class="label">Small ($/system)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-comm-small" value="89" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Medium ($/system)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-comm-medium" value="109" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Large ($/system)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-comm-large" value="189" readonly />
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 12px; margin-bottom: 8px;">Commercial filter labor</p>
+      <div class="field-grid-2">
+        <div class="field">
+          <label class="label">Per 10 filters (included)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-comm-filter-labor-included" value="105" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Per 10 filters (standalone)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-comm-filter-labor-standalone" value="135" readonly />
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 16px; margin-bottom: 8px;">VRF rates (× 2 visits per year)</p>
+      <div class="field-grid-3">
+        <div class="field">
+          <label class="label">Standard ($/system)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-vrf-standard" value="79" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Air handler ($/each)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-vrf-handler" value="40" readonly />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">ERV ($/each)</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="rate-vrf-erv" value="20" readonly />
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 12px; margin-bottom: 8px;">VRF filter labor</p>
+      <div class="field">
+        <label class="label">Per 10 filters</label>
+        <div class="input-with-prefix">
+          <span class="input-affix input-prefix">$</span>
+          <input type="number" id="rate-vrf-filter-labor" value="125" readonly />
+        </div>
+      </div>
+
+      <div class="hint">
+        <strong style="color: var(--accent);">Display only.</strong>
+        Edit these rates in the <code>Maintenance - Globals</code> table in Airtable, then click ↻ above.
+        Filter cost multipliers use a tier table — see <code>Maintenance - Filter Tiers</code>.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUMMARY -->
+  <aside class="summary">
+    <div class="summary-label">Annual Comfort Club price</div>
+    <div class="summary-total" id="sum-total">$0</div>
+    <div class="summary-sub" id="sum-sub">Commercial maintenance</div>
+
+    <div class="empty-state" id="empty-state">
+      Enter equipment counts and filter info to see pricing.
+    </div>
+
+    <div class="price-breakdown" id="price-breakdown" style="display: none;">
+      <div class="price-row">
+        <span class="price-row-label" id="row1-label">With filter changes at maintenance</span>
+        <span class="price-row-value" id="sum-base">$0</span>
+      </div>
+      <div class="price-row" id="row-with-standalone" style="display: none;">
+        <span class="price-row-label">With standalone filter changes</span>
+        <span class="price-row-value" id="sum-with-standalone">$0</span>
+      </div>
+    </div>
+
+    <div class="pay-section" id="pay-section" style="display: none;">
+      <div class="pay-section-label">Pay schedule (per visit)</div>
+      <div class="pay-row">
+        <span>Per maintenance visit</span>
+        <strong id="pay-visit">$0</strong>
+      </div>
+      <div class="pay-row" id="pay-filter-row" style="display: none;">
+        <span>Per standalone filter change</span>
+        <strong id="pay-filter">$0</strong>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<!-- LOADING SHADE -->
+<div class="loading-shade hidden" id="loading-shade">
+  <div class="loading-text">Loading…</div>
+</div>
+
+<script>
+// ============================================
+// SESSION / AUTH
+// ============================================
+let currentUser = null;
+const CALC_KEY = 'Commercial & VRF';
+
+function restoreSession() {
+  try {
+    const stored = localStorage.getItem('aircontrol-pricing-user');
+    if (!stored) return false;
+    const user = JSON.parse(stored);
+    const isAdmin = user.role && user.role.toLowerCase() === 'admin';
+    const allowed = user.calculators || [];
+    if (!isAdmin && !allowed.includes(CALC_KEY)) {
+      window.location.href = '/';
+      return true;
+    }
+    currentUser = user;
+    showCalc();
+    return true;
+  } catch (e) { return false; }
+}
+
+function saveSession(user) {
+  localStorage.setItem('aircontrol-pricing-user', JSON.stringify(user));
+}
+
+async function attemptLogin() {
+  const errorEl = document.getElementById('lock-error');
+  const inputEl = document.getElementById('passcode-input');
+  const passcode = inputEl.value.trim();
+  errorEl.textContent = '';
+  if (!passcode || passcode.length < 3) {
+    errorEl.textContent = 'Enter your passcode';
+    return;
+  }
+  document.getElementById('loading-shade').classList.remove('hidden');
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      errorEl.textContent = data.error || 'Invalid passcode';
+      return;
+    }
+    const isAdmin = data.user.role && data.user.role.toLowerCase() === 'admin';
+    const allowed = data.user.calculators || [];
+    if (!isAdmin && !allowed.includes(CALC_KEY)) {
+      errorEl.textContent = "You don't have access to this calculator";
+      return;
+    }
+    currentUser = data.user;
+    saveSession(currentUser);
+    showCalc();
+  } catch (err) {
+    errorEl.textContent = 'Sign-in failed. Try again.';
+    console.error(err);
+  } finally {
+    document.getElementById('loading-shade').classList.add('hidden');
+  }
+}
+
+function showCalc() {
+  document.getElementById('lock-screen').classList.add('hidden');
+  document.getElementById('header').style.display = '';
+  document.getElementById('main').style.display = '';
+  document.getElementById('user-name').textContent = currentUser.name;
+  const pill = document.getElementById('role-pill');
+  pill.textContent = currentUser.role;
+  pill.className = 'role-pill' + (currentUser.role.toLowerCase() === 'admin' ? '' : ' estimator');
+  if (currentUser.role.toLowerCase() === 'admin') {
+    document.body.classList.add('admin');
+  }
+  loadPricing();
+}
+
+// ============================================
+// PRICING FETCH
+// ============================================
+// Filter cost tier table — defaults; may be overridden from Airtable
+window._filterTiers = [
+  { min: 0,   multiplier: 8 },
+  { min: 5,   multiplier: 6 },
+  { min: 10,  multiplier: 4 },
+  { min: 50,  multiplier: 2.5 },
+  { min: 100, multiplier: 2 },
+  { min: 250, multiplier: 2 },
+];
+
+async function loadPricing() {
+  try {
+    const res = await fetch('/api/maintenance-pricing');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.globals) {
+      Object.entries(data.globals).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val != null) el.value = val;
+      });
+    }
+    if (data.filterTiers && Array.isArray(data.filterTiers) && data.filterTiers.length > 0) {
+      window._filterTiers = data.filterTiers;
+    }
+    calc();
+  } catch (err) {
+    console.error('Pricing load error:', err);
+  }
+}
+
+// ============================================
+// MATH
+// ============================================
+function num(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(n) {
+  if (isNaN(n) || n == null) return '$0';
+  return '$' + Math.round(n).toLocaleString();
+}
+
+// VLOOKUP-style: find the largest tier-min that is <= cost, return its multiplier
+function getFilterMultiplier(cost) {
+  const sorted = [...window._filterTiers].sort((a, b) => a.min - b.min);
+  let mult = sorted[0].multiplier;
+  for (const tier of sorted) {
+    if (cost >= tier.min) mult = tier.multiplier;
+    else break;
+  }
+  return mult;
+}
+
+let activeMode = 'commercial';
+
+function calc() {
+  if (activeMode === 'commercial') {
+    calcCommercial();
+  } else {
+    calcVrf();
+  }
+}
+
+function calcCommercial() {
+  const small = num('comm-small');
+  const medium = num('comm-medium');
+  const large = num('comm-large');
+  const filtersPerVisit = num('filters-per-visit');
+  const standaloneChanges = num('standalone-changes');
+  const filterCost = num('filter-cost');
+
+  const rSmall = num('rate-comm-small') || 89;
+  const rMed = num('rate-comm-medium') || 109;
+  const rLg = num('rate-comm-large') || 189;
+  const rFilterIncluded = num('rate-comm-filter-labor-included') || 105;
+  const rFilterStandalone = num('rate-comm-filter-labor-standalone') || 135;
+
+  // Need at least one system to compute a price
+  const totalSystems = small + medium + large;
+  if (totalSystems <= 0) {
+    resetSummary('Commercial maintenance');
+    return;
+  }
+
+  // Per-system × 2 visits
+  const smallCost = small * rSmall * 2;
+  const medCost = medium * rMed * 2;
+  const largeCost = large * rLg * 2;
+
+  // Filter cost multiplier × filter cost per visit
+  const filterMult = getFilterMultiplier(filterCost);
+  const filterCostBlock = filterMult * filterCost;
+
+  // Included filter changes (at maintenance visits) = (CEILING(FPV/10) × 105 + FPV) × 2
+  const includedFilterChanges = filtersPerVisit > 0
+    ? (Math.ceil(filtersPerVisit / 10) * rFilterIncluded + filterCostBlock) * 2
+    : 0;
+
+  // Standalone filter changes = (CEILING(FPV/10) × 135 + FPV) × standaloneChanges
+  // (Note: spreadsheet uses B12 which is filtersPerVisit; +B12 is "+ FPV")
+  // BUT looking more carefully at the formula: B10 = (((CEILING(B12/10,1)*135))+B12)*B10
+  // That's (filterLabor + filtersPerVisit) * standaloneCount — but filtersPerVisit shouldn't add as dollars
+  // Actually it IS a labor calc that gets multiplied by the number of standalone visits.
+  // Re-checking: B12 in formula refers to filtersPerVisit. Then +B12 adds raw filter cost? No it adds the count.
+  // The spreadsheet formula reads: ((CEILING(filtersPerVisit/10) * 135) + filtersPerVisit) × standaloneCount
+  // That likely means: filter labor + filter cost block, all × standalone count
+  // BUT the spreadsheet's B10 references B12 (which is just FPV count, not cost). Could be a bug or shorthand.
+  // To match spreadsheet behavior exactly we replicate the formula literally:
+  const standaloneFilterChanges = standaloneChanges > 0
+    ? (Math.ceil(filtersPerVisit / 10) * rFilterStandalone + filterCostBlock) * standaloneChanges
+    : 0;
+
+  const totalBase = smallCost + medCost + largeCost + includedFilterChanges;
+  const totalWithStandalone = totalBase + standaloneFilterChanges;
+
+  // Display
+  const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
+  document.getElementById('sum-total').textContent = fmt(activeTotal);
+  document.getElementById('sum-sub').textContent = 'Commercial maintenance';
+  document.getElementById('row1-label').textContent = 'With filter changes at maintenance';
+  document.getElementById('sum-base').textContent = fmt(totalBase);
+  document.getElementById('price-breakdown').style.display = '';
+  document.getElementById('empty-state').style.display = 'none';
+
+  if (standaloneChanges > 0) {
+    document.getElementById('row-with-standalone').style.display = '';
+    document.getElementById('sum-with-standalone').textContent = fmt(totalWithStandalone);
+  } else {
+    document.getElementById('row-with-standalone').style.display = 'none';
+  }
+
+  // Pay schedule
+  document.getElementById('pay-section').style.display = '';
+  const payPerVisit = totalBase / 2; // 2 visits per year
+  document.getElementById('pay-visit').textContent = fmt(payPerVisit);
+  if (standaloneChanges > 0) {
+    const payPerFilterChange = (totalWithStandalone - totalBase) / standaloneChanges;
+    document.getElementById('pay-filter-row').style.display = '';
+    document.getElementById('pay-filter').textContent = fmt(payPerFilterChange);
+  } else {
+    document.getElementById('pay-filter-row').style.display = 'none';
+  }
+}
+
+function calcVrf() {
+  const standardSystems = num('vrf-standard');
+  const handlers = num('vrf-handlers');
+  const ervs = num('vrf-ervs');
+  const filtersPerVisit = num('filters-per-visit');
+  const standaloneChanges = num('standalone-changes');
+  const filterCost = num('filter-cost');
+
+  const rStd = num('rate-vrf-standard') || 79;
+  const rHandler = num('rate-vrf-handler') || 40;
+  const rErv = num('rate-vrf-erv') || 20;
+  const rFilterLabor = num('rate-vrf-filter-labor') || 125;
+
+  const totalEquipment = standardSystems + handlers + ervs;
+  if (totalEquipment <= 0) {
+    resetSummary('VRF maintenance');
+    return;
+  }
+
+  const stdCost = standardSystems * rStd * 2;
+  const handlerCost = handlers * rHandler * 2;
+  const ervCost = ervs * rErv * 2;
+
+  const filterMult = getFilterMultiplier(filterCost);
+  const filterCostBlock = filterMult * filterCost;
+
+  // VRF filter changes at maintenance = (CEILING(FPV/10) × 125 + filterCostBlock) × 2
+  // Note: spreadsheet formula has "+B12" but it references Sheet3's empty B12 cell
+  // (not VRF's B12), so it adds nothing. We replicate that behavior.
+  const includedFilterChanges = filtersPerVisit > 0
+    ? (Math.ceil(filtersPerVisit / 10) * rFilterLabor + filterCostBlock) * 2
+    : 0;
+
+  // Standalone = (CEILING(FPV/10) × 125 + filterCostBlock) × standaloneCount
+  const standaloneFilterChanges = standaloneChanges > 0
+    ? (Math.ceil(filtersPerVisit / 10) * rFilterLabor + filterCostBlock) * standaloneChanges
+    : 0;
+
+  const totalBase = stdCost + handlerCost + ervCost + includedFilterChanges;
+  const totalWithStandalone = totalBase + standaloneFilterChanges;
+
+  const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
+  document.getElementById('sum-total').textContent = fmt(activeTotal);
+  document.getElementById('sum-sub').textContent = 'VRF maintenance';
+  document.getElementById('row1-label').textContent = filtersPerVisit > 0 ? 'With filter changes' : 'No filter changes';
+  document.getElementById('sum-base').textContent = fmt(totalBase);
+  document.getElementById('price-breakdown').style.display = '';
+  document.getElementById('empty-state').style.display = 'none';
+
+  if (standaloneChanges > 0) {
+    document.getElementById('row-with-standalone').style.display = '';
+    document.getElementById('sum-with-standalone').textContent = fmt(totalWithStandalone);
+  } else {
+    document.getElementById('row-with-standalone').style.display = 'none';
+  }
+
+  // Pay schedule
+  document.getElementById('pay-section').style.display = '';
+  const payPerVisit = totalBase / 2;
+  document.getElementById('pay-visit').textContent = fmt(payPerVisit);
+  if (standaloneChanges > 0) {
+    const payPerFilterChange = (totalWithStandalone - totalBase) / standaloneChanges;
+    document.getElementById('pay-filter-row').style.display = '';
+    document.getElementById('pay-filter').textContent = fmt(payPerFilterChange);
+  } else {
+    document.getElementById('pay-filter-row').style.display = 'none';
+  }
+}
+
+function resetSummary(subtitle) {
+  document.getElementById('sum-total').textContent = '$0';
+  document.getElementById('sum-sub').textContent = subtitle;
+  document.getElementById('price-breakdown').style.display = 'none';
+  document.getElementById('pay-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = '';
+}
+
+// ============================================
+// MODE TOGGLE (Commercial ↔ VRF)
+// ============================================
+document.querySelectorAll('.mode-opt').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.mode-opt').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    activeMode = el.dataset.mode;
+    // Show/hide the right system input card
+    document.getElementById('card-commercial-systems').classList.toggle('hidden', activeMode !== 'commercial');
+    document.getElementById('card-vrf-systems').classList.toggle('hidden', activeMode !== 'vrf');
+    calc();
+  });
+});
+
+// ============================================
+// EVENT WIRING
+// ============================================
+document.getElementById('passcode-submit').addEventListener('click', attemptLogin);
+document.getElementById('passcode-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') attemptLogin();
+});
+document.getElementById('home-btn').addEventListener('click', () => {
+  window.location.href = '/';
+});
+document.getElementById('refresh-btn').addEventListener('click', loadPricing);
+document.addEventListener('input', calc);
+document.addEventListener('change', calc);
+
+// On load
+if (!restoreSession()) {
+  document.getElementById('passcode-input').focus();
+}
+</script>
+
+</body>
+</html>
