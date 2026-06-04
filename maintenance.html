@@ -245,23 +245,14 @@
     top: 24px;
     align-self: start;
   }
-  .summary-label {
-    font-size: 11px;
-    color: #a8a399;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .summary-total {
-    font-size: 36px;
-    font-weight: 500;
-    line-height: 1.1;
-    margin-bottom: 6px;
-  }
-  .summary-sub {
+  .summary-mode {
     font-size: 13px;
-    color: #d1cdc4;
+    color: #f5f2ea;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 0.5px solid #3a3835;
   }
   .price-breakdown {
     background: #232220;
@@ -555,9 +546,7 @@
 
   <!-- SUMMARY -->
   <aside class="summary">
-    <div class="summary-label">Annual prepaid price</div>
-    <div class="summary-total" id="sum-total">$0</div>
-    <div class="summary-sub" id="sum-sub">Commercial maintenance</div>
+    <div class="summary-mode" id="sum-sub">Commercial maintenance</div>
 
     <div class="empty-state" id="empty-state">
       Enter equipment counts and filter info to see pricing.
@@ -799,8 +788,6 @@ function calcCommercial() {
   const totalWithStandalone = totalBase + standaloneFilterChanges;
 
   // Display
-  const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
-  document.getElementById('sum-total').textContent = fmt(activeTotal);
   document.getElementById('sum-sub').textContent = 'Commercial maintenance';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -870,8 +857,6 @@ function calcVrf() {
   const totalBase = stdCost + handlerCost + ervCost + includedFilterChanges;
   const totalWithStandalone = totalBase + standaloneFilterChanges;
 
-  const activeTotal = standaloneChanges > 0 ? totalWithStandalone : totalBase;
-  document.getElementById('sum-total').textContent = fmt(activeTotal);
   document.getElementById('sum-sub').textContent = 'VRF maintenance';
   document.getElementById('empty-state').style.display = 'none';
 
@@ -901,7 +886,6 @@ function calcVrf() {
 }
 
 function resetSummary(subtitle) {
-  document.getElementById('sum-total').textContent = '$0';
   document.getElementById('sum-sub').textContent = subtitle;
   document.getElementById('prepaid-section').style.display = 'none';
   document.getElementById('pervisit-section').style.display = 'none';
