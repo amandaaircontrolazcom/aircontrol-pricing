@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/electrical-repair", "destination": "/electrical-repair.html" },
     { "source": "/plumbing-repair", "destination": "/plumbing-repair.html" },
-    { "source": "/hvac-repair", "destination": "/hvac-repair.html" }
+    { "source": "/hvac-repair", "destination": "/hvac-repair.html" },
+    { "source": "/maintenance", "destination": "/maintenance.html" }
   ]
 }
