@@ -354,7 +354,7 @@
   <div class="workspace">
 
     <div class="scope-note">
-      <strong>Use this for Commercial and VRF maintenance pricing.</strong> Comfort Club pricing only — non-member pricing is not currently supported.
+      <strong>This calculator generates Comfort Club contract pricing for Commercial and VRF maintenance agreements.</strong>
     </div>
 
     <!-- 01 MODE TOGGLE -->
@@ -872,17 +872,8 @@ function calcVrf() {
     document.getElementById('row-prepaid-standalone').style.display = 'none';
   }
 
-  // SECTION 2: Pay per visit
-  document.getElementById('pervisit-section').style.display = '';
-  const payPerVisit = totalBase / 2;
-  document.getElementById('sum-pervisit-base').textContent = fmt(payPerVisit);
-  if (standaloneChanges > 0) {
-    const payPerFilterChange = (totalWithStandalone - totalBase) / standaloneChanges;
-    document.getElementById('row-pervisit-filter').style.display = '';
-    document.getElementById('sum-pervisit-filter').textContent = fmt(payPerFilterChange);
-  } else {
-    document.getElementById('row-pervisit-filter').style.display = 'none';
-  }
+  // VRF: pay-per-visit is NOT offered for VRF contracts — hide that section
+  document.getElementById('pervisit-section').style.display = 'none';
 }
 
 function resetSummary(subtitle) {
