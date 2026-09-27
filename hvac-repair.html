@@ -362,6 +362,151 @@
   }
   .loading-shade.hidden { display: none; }
   .loading-text { font-size: 13px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* SELECTS */
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 0.5px solid var(--line-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+  input.missing, select.missing { border-color: var(--bad); }
+
+  /* REPAIR LINES */
+  .repair-list { display: flex; flex-direction: column; gap: 10px; }
+  .repair-line {
+    border: 0.5px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--bg);
+  }
+  .repair-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .std-hours {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    background: var(--surface-alt);
+    border-radius: 6px;
+    padding: 10px 12px;
+    min-width: 84px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .remove-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-3); font-size: 18px; line-height: 1;
+    padding: 6px 8px; border-radius: 6px;
+  }
+  .remove-btn:hover { color: var(--bad); background: var(--surface-alt); }
+  .remove-btn[disabled] { visibility: hidden; }
+  .other-fields {
+    display: grid;
+    grid-template-columns: 1fr 130px;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .other-fields.hidden { display: none; }
+  @media (max-width: 520px) {
+    .other-fields { grid-template-columns: 1fr; }
+  }
+  .add-btn {
+    margin-top: 12px;
+    background: none;
+    border: 0.5px dashed var(--line-strong);
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+    font-size: 13px;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .add-btn:hover { border-color: var(--accent); color: var(--ink); }
+  .hours-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 12px; padding-top: 10px;
+    border-top: 0.5px solid var(--line);
+    font-size: 12px; color: var(--ink-2);
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .hours-total strong { font-family: var(--font-mono); font-size: 14px; color: var(--ink); letter-spacing: 0; }
+
+  .field-grid-2.addl { grid-template-columns: 130px 1fr; }
+  @media (max-width: 520px) {
+    .field-grid-2.addl { grid-template-columns: 1fr; }
+  }
+  .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) {
+    .field-grid-2, .field-grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* SUMMARY — labor + flags + copy */
+  .labor-lines {
+    background: #232220;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .labor-lines .section-head {
+    font-size: 10px; color: #a8a399;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .labor-line {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 4px 0; font-size: 12px; color: #d1cdc4;
+  }
+  .labor-line span:last-child { font-family: var(--font-mono); white-space: nowrap; }
+  .labor-line.flag span:first-child { color: var(--amber); }
+  .labor-line.total { border-top: 0.5px solid #3a3835; margin-top: 4px; padding-top: 8px; color: #f5f2ea; font-weight: 500; }
+  .review-banner {
+    background: rgba(212, 169, 96, 0.15);
+    border: 0.5px solid rgba(212, 169, 96, 0.5);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .review-banner strong { color: var(--amber); display: block; margin-bottom: 2px; }
+  .review-banner ul { margin: 0 0 0 16px; color: #d1cdc4; font-size: 11px; }
+  .blocked-banner {
+    background: rgba(212, 121, 107, 0.15);
+    border: 0.5px solid rgba(212, 121, 107, 0.5);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #f5f2ea;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .blocked-banner strong { color: #d4796b; display: block; margin-bottom: 2px; }
+  .blocked-banner ul { margin: 0 0 0 16px; color: #d1cdc4; font-size: 11px; }
+  .copy-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 500;
+    background: #f5f2ea;
+    color: #1a1916;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .copy-btn:hover { background: #fff; }
+  .copy-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
@@ -385,7 +530,7 @@
     <button class="home-btn" id="home-btn" title="Back to home">← Home</button>
     <div>
       <span class="calc-title">HVAC Repair</span>
-      <span class="calc-sub">One-off pricing</span>
+      <span class="calc-sub">Standard repair pricing</span>
     </div>
   </div>
   <div class="header-right">
@@ -401,7 +546,7 @@
   <div class="workspace">
 
     <div class="scope-note">
-      <strong>Use this for one-off HVAC service repairs.</strong> Coils, TXVs, reversing valves, capacitors, contactors, motors, etc. Not for installs, ductwork, or full-system replacements — those have separate pricing.
+      <strong>Pick the repair — labor time is set for you.</strong> Each repair has a standard time. If the job truly needs more, add it under Additional Time with a reason. Not for installs, ductwork, or full-system replacements.
     </div>
 
     <!-- 01 JOB REFERENCE -->
@@ -411,68 +556,79 @@
         <div class="card-meta">Optional</div>
       </div>
       <div class="field">
-        <label class="label">Reference</label>
+        <label class="label" for="job-ref">Reference</label>
         <input type="text" id="job-ref" placeholder="e.g., Smith — replace capacitor on AC" />
       </div>
     </div>
 
-    <!-- 02 LABOR -->
+    <!-- 02 REPAIRS -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title"><span class="card-num">02</span>Labor</div>
-        <div class="card-meta">Wrench time + testing + cleanup</div>
+        <div class="card-title"><span class="card-num">02</span>Repair</div>
+        <div class="card-meta">Standard labor time</div>
       </div>
-      <div class="field">
-        <label class="label">Hours to complete <span class="req">*</span></label>
-        <div class="input-with-suffix">
-          <input type="number" id="labor-hours" min="0" step="0.25" placeholder="0" />
-          <span class="input-affix input-suffix">hrs</span>
-        </div>
+      <div class="repair-list" id="repair-list"></div>
+      <button type="button" class="add-btn" id="add-repair">+ Add another repair</button>
+      <div class="hours-total">
+        <span>Standard time</span>
+        <strong id="std-hours-total">0 hrs</strong>
       </div>
     </div>
 
-    <!-- 03 MATERIAL -->
+    <!-- 03 ADDITIONAL TIME -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title"><span class="card-num">03</span>Material & Equipment</div>
+        <div class="card-title"><span class="card-num">03</span>Additional Time</div>
+        <div class="card-meta">Only if needed · reason required</div>
+      </div>
+      <div class="field-grid-2 addl">
+        <div class="field">
+          <label class="label" for="addl-hours">Extra hours</label>
+          <div class="input-with-suffix">
+            <input type="number" id="addl-hours" min="0" step="0.25" placeholder="0" />
+            <span class="input-affix input-suffix">hrs</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="addl-reason">Reason <span class="req">*</span></label>
+          <select id="addl-reason">
+            <option value="">— Select a reason —</option>
+          </select>
+        </div>
+      </div>
+      <div class="field hidden" id="addl-other-field" style="margin-top: 12px;">
+        <label class="label" for="addl-other">Explain <span class="req">*</span></label>
+        <input type="text" id="addl-other" placeholder="Why does this job need more time?" />
+      </div>
+    </div>
+
+    <!-- 04 PARTS -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="card-num">04</span>Parts &amp; Refrigerant</div>
         <div class="card-meta">Direct cost to company · include tax</div>
-      </div>
-      <div class="field">
-        <label class="label">Total cost <span class="req">*</span></label>
-        <div class="input-with-prefix">
-          <span class="input-affix input-prefix">$</span>
-          <input type="number" id="material-cost" min="0" step="0.01" placeholder="0.00" />
-        </div>
-        <div class="field-hint">Enter material cost including tax</div>
-      </div>
-    </div>
-
-    <!-- 04 SHIPPING -->
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="card-num">04</span>Shipping</div>
-        <div class="card-meta">Pass-through · no markup</div>
-      </div>
-      <div class="field">
-        <label class="label">Shipping cost</label>
-        <div class="input-with-prefix">
-          <span class="input-affix input-prefix">$</span>
-          <input type="number" id="shipping-cost" min="0" step="0.01" placeholder="0.00" />
-        </div>
-        <div class="field-hint">Optional · added to final total at cost (no margin applied)</div>
-      </div>
-    </div>
-
-    <!-- 05 REFRIGERANT -->
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="card-num">05</span>Refrigerant</div>
-        <div class="card-meta">Optional</div>
       </div>
       <div class="field-grid-2">
         <div class="field">
-          <label class="label">Type</label>
-          <select id="refrig-type" style="width: 100%; padding: 10px 12px; font-size: 14px; border: 0.5px solid var(--line-strong); border-radius: 6px; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+          <label class="label" for="material-cost">Parts &amp; material cost</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="material-cost" min="0" step="0.01" placeholder="0.00" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="shipping-cost">Shipping</label>
+          <div class="input-with-prefix">
+            <span class="input-affix input-prefix">$</span>
+            <input type="number" id="shipping-cost" min="0" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="field-hint">Added at cost · no markup</div>
+        </div>
+      </div>
+      <div class="field-grid-2" style="margin-top: 14px;">
+        <div class="field">
+          <label class="label" for="refrig-type">Refrigerant</label>
+          <select id="refrig-type">
             <option value="">— None —</option>
             <option value="R-22">R-22</option>
             <option value="R-410A">R-410A</option>
@@ -481,7 +637,7 @@
           </select>
         </div>
         <div class="field">
-          <label class="label">Pounds added</label>
+          <label class="label" for="refrig-pounds">Pounds added</label>
           <div class="input-with-suffix">
             <input type="number" id="refrig-pounds" min="0" step="0.1" placeholder="0" />
             <span class="input-affix input-suffix">lbs</span>
@@ -494,25 +650,25 @@
       </div>
     </div>
 
-    <!-- 06 CUSTOMER TYPE -->
+    <!-- 05 CUSTOMER TYPE -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title"><span class="card-num">06</span>Customer Type</div>
+        <div class="card-title"><span class="card-num">05</span>Customer Type</div>
       </div>
       <div class="cust-toggle">
         <div class="cust-opt active" data-cust="standard">Standard
           <span class="cust-opt-sub">Non-member price</span>
         </div>
         <div class="cust-opt" data-cust="cc">Comfort Club
-          <span class="cust-opt-sub">Member base price</span>
+          <span class="cust-opt-sub">Member price</span>
         </div>
       </div>
     </div>
 
-    <!-- 07 PRICING CONFIG (admin only) -->
+    <!-- 06 PRICING CONFIG (admin only) -->
     <div class="card admin-only">
       <div class="card-head">
-        <div class="card-title"><span class="card-num">07</span>Pricing Configuration</div>
+        <div class="card-title"><span class="card-num">06</span>Pricing Configuration</div>
         <div class="card-meta">Read-only · edit in Airtable</div>
       </div>
       <div class="field-grid-2">
@@ -575,8 +731,10 @@
       </div>
       <div class="hint">
         <strong style="color: var(--accent);">Display only.</strong>
-        These values reflect what's in Airtable. To change pricing, edit the
-        <code>Repair - HVAC Globals</code> table in Airtable, then click ↻ above.
+        Rates come from <code>Repair - HVAC Globals</code>, refrigerant from
+        <code>Repair - HVAC Refrigerant</code>, and repair times from
+        <code>Repair - HVAC Repair Times</code> in Airtable. Edit there, then click ↻ above.
+        <br /><span id="times-source">Repair times: built-in defaults.</span>
       </div>
     </div>
 
@@ -591,13 +749,23 @@
       Gross margin: <span id="sum-gross-margin">0%</span>
     </div>
 
-    <div class="floor-banner" id="floor-banner" style="display: none;">
-      <strong>⚠ Floor pricing applied</strong>
-      <span class="floor-detail">Price was raised to protect margin. Double-check labor hours and material cost.</span>
+    <div class="empty-state" id="empty-state">
+      Pick a repair to see pricing.
     </div>
 
-    <div class="empty-state" id="empty-state">
-      Enter labor hours and material cost to see pricing.
+    <div class="blocked-banner hidden" id="blocked-banner">
+      <strong>Finish these to see pricing</strong>
+      <ul id="blocked-list"></ul>
+    </div>
+
+    <div class="floor-banner" id="floor-banner" style="display: none;">
+      <strong>⚠ Floor pricing applied</strong>
+      <span class="floor-detail">Price was raised to protect margin. Double-check the parts cost.</span>
+    </div>
+
+    <div class="review-banner hidden" id="review-banner">
+      <strong>Flagged for review</strong>
+      <ul id="review-list"></ul>
     </div>
 
     <div class="price-comparison" id="price-comparison" style="display: none;">
@@ -611,13 +779,15 @@
       </div>
     </div>
 
+    <div class="labor-lines hidden" id="labor-lines"></div>
+
     <div class="breakdown admin-only" id="breakdown">
       <div class="breakdown-row">
         <span>Break-even labor</span>
         <span class="breakdown-value" id="bd-labor">$0</span>
       </div>
       <div class="breakdown-row">
-        <span>Material cost</span>
+        <span>Parts &amp; material</span>
         <span class="breakdown-value" id="bd-material">$0</span>
       </div>
       <div class="breakdown-row">
@@ -649,6 +819,8 @@
         <span class="breakdown-value" id="bd-margin">0%</span>
       </div>
     </div>
+
+    <button type="button" class="copy-btn" id="copy-btn" disabled>Copy quote summary</button>
   </aside>
 
 </main>
@@ -742,6 +914,188 @@ function showCalc() {
 }
 
 // ============================================
+// STANDARD REPAIR TIMES
+// Built-in defaults, used until the "Repair - HVAC Repair Times" table in
+// Airtable has rows. Once it does, Airtable wins and this list is ignored.
+// Hours = the full job: diagnosis already done, so wrench time + testing + cleanup.
+// ============================================
+const DEFAULT_REPAIRS = [
+  // Electrical & controls
+  { category: 'Electrical & Controls', name: 'Capacitor', hours: 0.5 },
+  { category: 'Electrical & Controls', name: 'Contactor', hours: 0.75 },
+  { category: 'Electrical & Controls', name: 'Hard start kit', hours: 0.75 },
+  { category: 'Electrical & Controls', name: 'Transformer', hours: 1 },
+  { category: 'Electrical & Controls', name: 'Thermostat — standard', hours: 1 },
+  { category: 'Electrical & Controls', name: 'Thermostat — Wi-Fi / smart', hours: 1.5 },
+  { category: 'Electrical & Controls', name: 'Control board — furnace / air handler', hours: 1.5 },
+  { category: 'Electrical & Controls', name: 'Defrost board', hours: 1.25 },
+  { category: 'Electrical & Controls', name: 'Disconnect / fuses', hours: 1 },
+  { category: 'Electrical & Controls', name: 'Time delay relay', hours: 0.75 },
+  // Motors
+  { category: 'Motors', name: 'Condenser fan motor', hours: 1.5 },
+  { category: 'Motors', name: 'Condenser fan blade', hours: 0.75 },
+  { category: 'Motors', name: 'Blower motor — PSC', hours: 2 },
+  { category: 'Motors', name: 'Blower motor — ECM', hours: 2 },
+  { category: 'Motors', name: 'Blower wheel', hours: 2.5 },
+  { category: 'Motors', name: 'Inducer motor', hours: 2 },
+  // Heating
+  { category: 'Heating', name: 'Flame sensor', hours: 0.5 },
+  { category: 'Heating', name: 'Hot surface igniter', hours: 0.75 },
+  { category: 'Heating', name: 'Pressure switch', hours: 0.75 },
+  { category: 'Heating', name: 'Limit / rollout switch', hours: 0.75 },
+  { category: 'Heating', name: 'Gas valve', hours: 2 },
+  { category: 'Heating', name: 'Heat strip / sequencer', hours: 1.5 },
+  // Refrigerant circuit
+  { category: 'Refrigerant Circuit', name: 'Leak search', hours: 1.5 },
+  { category: 'Refrigerant Circuit', name: 'Schrader core(s)', hours: 0.75 },
+  { category: 'Refrigerant Circuit', name: 'High / low pressure switch', hours: 1.5 },
+  { category: 'Refrigerant Circuit', name: 'Filter drier', hours: 1.5 },
+  { category: 'Refrigerant Circuit', name: 'TXV', hours: 4 },
+  { category: 'Refrigerant Circuit', name: 'Reversing valve', hours: 5 },
+  { category: 'Refrigerant Circuit', name: 'Evaporator coil', hours: 6 },
+  { category: 'Refrigerant Circuit', name: 'Condenser coil', hours: 6 },
+  { category: 'Refrigerant Circuit', name: 'Compressor', hours: 8 },
+  // Drains
+  { category: 'Condensate', name: 'Clear condensate drain', hours: 0.75 },
+  { category: 'Condensate', name: 'Float switch', hours: 0.75 },
+  { category: 'Condensate', name: 'Condensate pump', hours: 1 },
+  { category: 'Condensate', name: 'Drain pan', hours: 2.5 },
+];
+
+// Reasons a job can need more than the standard time.
+const ADDITIONAL_TIME_REASONS = [
+  'Attic / crawlspace access',
+  'Rooftop unit — crane or lift',
+  'Tight or blocked access',
+  'Rusted or seized parts',
+  'Second tech required',
+  'Parts run / second trip',
+  'Wiring or controls issue found',
+  'Other',
+];
+
+const OTHER = '__other';
+let REPAIRS = DEFAULT_REPAIRS.slice();
+
+// One entry per repair line on the ticket.
+let lineSeq = 0;
+let lines = [newLine()];
+
+function newLine() {
+  return { id: ++lineSeq, repair: '', otherDesc: '', otherHours: '' };
+}
+
+function findRepair(name) {
+  return REPAIRS.find(r => r.name === name);
+}
+
+function hrs(n) {
+  const v = Math.round(n * 100) / 100;
+  return `${v} hr${v === 1 ? '' : 's'}`;
+}
+
+function buildRepairSelect(line) {
+  const sel = document.createElement('select');
+  sel.appendChild(new Option('— Select a repair —', ''));
+  const groups = {};
+  REPAIRS.forEach(r => {
+    const cat = r.category || 'Other Repairs';
+    if (!groups[cat]) {
+      groups[cat] = document.createElement('optgroup');
+      groups[cat].label = cat;
+      sel.appendChild(groups[cat]);
+    }
+    groups[cat].appendChild(new Option(`${r.name} · ${hrs(r.hours)}`, r.name));
+  });
+  const otherGroup = document.createElement('optgroup');
+  otherGroup.label = 'Not listed';
+  otherGroup.appendChild(new Option('Other — describe the repair', OTHER));
+  sel.appendChild(otherGroup);
+  // Keep the selection if it still exists (e.g. after the list reloads)
+  if (line.repair === OTHER || findRepair(line.repair)) sel.value = line.repair;
+  else line.repair = '';
+  return sel;
+}
+
+function renderLines() {
+  const list = document.getElementById('repair-list');
+  list.innerHTML = '';
+  lines.forEach(line => {
+    const wrap = document.createElement('div');
+    wrap.className = 'repair-line';
+
+    const row = document.createElement('div');
+    row.className = 'repair-row';
+
+    const sel = buildRepairSelect(line);
+    sel.addEventListener('change', () => {
+      line.repair = sel.value;
+      renderLines();
+      calc();
+    });
+
+    const std = document.createElement('div');
+    std.className = 'std-hours';
+    const r = findRepair(line.repair);
+    std.textContent = r ? hrs(r.hours) : '—';
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove-btn';
+    remove.title = 'Remove this repair';
+    remove.textContent = '×';
+    remove.disabled = lines.length === 1;
+    remove.addEventListener('click', () => {
+      lines = lines.filter(l => l !== line);
+      renderLines();
+      calc();
+    });
+
+    row.append(sel, std, remove);
+    wrap.appendChild(row);
+
+    if (line.repair === OTHER) {
+      std.textContent = line.otherHours ? hrs(parseFloat(line.otherHours) || 0) : '—';
+      const other = document.createElement('div');
+      other.className = 'other-fields';
+
+      const desc = document.createElement('input');
+      desc.type = 'text';
+      desc.placeholder = 'Describe the repair (required)';
+      desc.value = line.otherDesc;
+      desc.addEventListener('input', () => { line.otherDesc = desc.value; });
+
+      const hoursWrap = document.createElement('div');
+      hoursWrap.className = 'input-with-suffix';
+      const hours = document.createElement('input');
+      hours.type = 'number';
+      hours.min = '0';
+      hours.step = '0.25';
+      hours.placeholder = '0';
+      hours.value = line.otherHours;
+      hours.addEventListener('input', () => {
+        line.otherHours = hours.value;
+        std.textContent = hours.value ? hrs(parseFloat(hours.value) || 0) : '—';
+      });
+      const suffix = document.createElement('span');
+      suffix.className = 'input-affix input-suffix';
+      suffix.textContent = 'hrs';
+      hoursWrap.append(hours, suffix);
+
+      other.append(desc, hoursWrap);
+      wrap.appendChild(other);
+    }
+
+    list.appendChild(wrap);
+  });
+}
+
+function renderReasons() {
+  const sel = document.getElementById('addl-reason');
+  ADDITIONAL_TIME_REASONS.forEach(r => sel.appendChild(new Option(r, r)));
+}
+
+// ============================================
 // PRICING FETCH FROM AIRTABLE
 // ============================================
 async function loadPricing() {
@@ -761,6 +1115,13 @@ async function loadPricing() {
     // Update refrigerant per-pound costs from Airtable if returned
     if (data.refrigerants) {
       window._refrigerantCosts = { ...window._refrigerantCosts, ...data.refrigerants };
+    }
+    // Standard repair times from Airtable replace the built-in list
+    if (Array.isArray(data.repairs) && data.repairs.length > 0) {
+      REPAIRS = data.repairs;
+      document.getElementById('times-source').textContent =
+        `Repair times: ${data.repairs.length} repairs loaded from Airtable.`;
+      renderLines();
     }
     calc();
   } catch (err) {
@@ -792,8 +1153,108 @@ window._refrigerantCosts = {
   'R-454B': 40,
 };
 
+// Reads the repair lines + additional time. Returns the labor hours and
+// anything that has to be filled in before a price can be shown.
+function readLabor() {
+  const items = [];
+  const missing = [];
+  const review = [];
+  let standardHours = 0;
+
+  lines.forEach((line, i) => {
+    const n = lines.length > 1 ? ` (repair ${i + 1})` : '';
+    if (!line.repair) {
+      if (lines.length > 1) missing.push(`Pick a repair${n} or remove it`);
+      return;
+    }
+    if (line.repair === OTHER) {
+      const desc = line.otherDesc.trim();
+      const h = parseFloat(line.otherHours) || 0;
+      if (!desc) missing.push(`Describe the "Other" repair${n}`);
+      if (h <= 0) missing.push(`Enter hours for the "Other" repair${n}`);
+      items.push({ label: `Other: ${desc || '—'}`, hours: h, other: true });
+      standardHours += h;
+      review.push(`Non-standard repair: ${desc || 'no description'}`);
+      return;
+    }
+    const r = findRepair(line.repair);
+    if (!r) return;
+    items.push({ label: r.name, hours: r.hours, other: false });
+    standardHours += r.hours;
+  });
+
+  const addlHours = Math.max(0, num('addl-hours'));
+  const reason = document.getElementById('addl-reason').value;
+  const reasonOther = document.getElementById('addl-other').value.trim();
+  let reasonText = reason === 'Other' ? reasonOther : reason;
+  if (addlHours > 0) {
+    if (!reason) missing.push('Pick a reason for the additional time');
+    else if (reason === 'Other' && !reasonOther) missing.push('Explain the additional time');
+    review.push(`Additional time: ${hrs(addlHours)} — ${reasonText || 'no reason'}`);
+    if (standardHours > 0 && addlHours > standardHours * 0.5) {
+      review.push('Additional time is more than half the standard time');
+    }
+  }
+
+  return {
+    items, missing, review,
+    standardHours, addlHours, reasonText,
+    totalHours: standardHours + addlHours,
+  };
+}
+
+function setList(id, entries) {
+  const ul = document.getElementById(id);
+  ul.innerHTML = '';
+  entries.forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+}
+
+function renderLaborLines(labor) {
+  const box = document.getElementById('labor-lines');
+  box.innerHTML = '';
+  if (labor.items.length === 0) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  const head = document.createElement('div');
+  head.className = 'section-head';
+  head.textContent = 'Labor';
+  box.appendChild(head);
+  const add = (label, value, cls) => {
+    const row = document.createElement('div');
+    row.className = 'labor-line' + (cls ? ' ' + cls : '');
+    const a = document.createElement('span');
+    a.textContent = label;
+    const b = document.createElement('span');
+    b.textContent = value;
+    row.append(a, b);
+    box.appendChild(row);
+  };
+  labor.items.forEach(it => add(it.label, hrs(it.hours), it.other ? 'flag' : ''));
+  if (labor.addlHours > 0) add(`Additional — ${labor.reasonText || 'reason needed'}`, hrs(labor.addlHours), 'flag');
+  add('Total labor', hrs(labor.totalHours), 'total');
+}
+
+let lastQuote = null;
+
+function resetOutputs() {
+  document.getElementById('sum-total').textContent = '$0';
+  document.getElementById('price-comparison').style.display = 'none';
+  document.getElementById('gross-margin-line').style.display = 'none';
+  document.getElementById('floor-banner').style.display = 'none';
+  ['bd-labor', 'bd-material', 'bd-refrigerant', 'bd-shipping', 'bd-commission', 'bd-allin', 'bd-profit']
+    .forEach(id => { document.getElementById(id).textContent = '$0'; });
+  document.getElementById('bd-raw-margin').textContent = '0%';
+  document.getElementById('bd-margin').textContent = '0%';
+  document.getElementById('copy-btn').disabled = true;
+  lastQuote = null;
+}
+
 function calc() {
-  const hours = num('labor-hours');
+  const labor = readLabor();
+  const hours = labor.totalHours;
   const materialCost = num('material-cost');
   const shippingCost = num('shipping-cost');
   const refrigType = document.getElementById('refrig-type').value;
@@ -807,9 +1268,34 @@ function calc() {
   const fudgePct = num('fudge-pct') || 5;
   const floorPct = num('floor-pct') || 50;
 
+  // Additional-time explanation box only shows for "Other"
+  document.getElementById('addl-other-field').classList.toggle('hidden', document.getElementById('addl-reason').value !== 'Other');
+  document.getElementById('std-hours-total').textContent = hrs(labor.standardHours);
+
   // Show R-22 warranty warning if R-22 selected
   const r22Warning = document.getElementById('r22-warning');
   r22Warning.style.display = refrigType === 'R-22' ? '' : 'none';
+
+  document.getElementById('sum-sub').textContent = activeCustType === 'cc' ? 'Comfort Club pricing' : 'Standard pricing';
+  renderLaborLines(labor);
+
+  // Review flags show whenever they apply, even before the price is complete
+  setList('review-list', labor.review);
+  document.getElementById('review-banner').classList.toggle('hidden', labor.review.length === 0);
+
+  // Nothing picked yet
+  const nothingPicked = labor.items.length === 0;
+  document.getElementById('empty-state').style.display = nothingPicked ? '' : 'none';
+
+  // Something required is missing — no price until it's filled in
+  setList('blocked-list', labor.missing);
+  const blocked = !nothingPicked && labor.missing.length > 0;
+  document.getElementById('blocked-banner').classList.toggle('hidden', !blocked);
+
+  if (nothingPicked || blocked || hours <= 0) {
+    resetOutputs();
+    return;
+  }
 
   // Refrigerant cost = pounds × per-pound cost (treated like material — flows through margin)
   const refrigPerPound = (refrigType && window._refrigerantCosts[refrigType]) || 0;
@@ -817,27 +1303,6 @@ function calc() {
 
   // Total "marginable" cost = material + refrigerant (NOT shipping — shipping is pass-through)
   const marginableMaterialCost = materialCost + refrigerantCost;
-
-  // Empty state — show $0 until labor + (material or refrigerant) entered
-  if (hours <= 0 || marginableMaterialCost <= 0) {
-    document.getElementById('sum-total').textContent = '$0';
-    document.getElementById('sum-sub').textContent = activeCustType === 'cc' ? 'Comfort Club pricing' : 'Standard pricing';
-    document.getElementById('price-comparison').style.display = 'none';
-    document.getElementById('empty-state').style.display = '';
-    document.getElementById('gross-margin-line').style.display = 'none';
-    // Zero out admin breakdown too
-    document.getElementById('bd-labor').textContent = '$0';
-    document.getElementById('bd-material').textContent = '$0';
-    document.getElementById('bd-refrigerant').textContent = '$0';
-    document.getElementById('bd-shipping').textContent = '$0';
-    document.getElementById('bd-commission').textContent = '$0';
-    document.getElementById('bd-allin').textContent = '$0';
-    document.getElementById('bd-profit').textContent = '$0';
-    document.getElementById('bd-raw-margin').textContent = '0%';
-    document.getElementById('bd-margin').textContent = '0%';
-    document.getElementById('floor-banner').style.display = 'none';
-    return;
-  }
 
   // Math
   // CC is the base price (members get the lower price as ground floor).
@@ -847,11 +1312,8 @@ function calc() {
   const marginFactor = 1 - (marginPct / 100);
   const ccPrice = marginFactor > 0 ? allInCost / marginFactor : allInCost;
 
-  // Compute Standard as CC ÷ (1 - markup%) — capped: the markup AMOUNT can't exceed cap
+  // Standard = CC ÷ (1 - markup%) — capped: the markup AMOUNT can't exceed cap
   const markupFactor = 1 - (ccDiscountPct / 100);
-  const standardUncapped = markupFactor > 0 ? ccPrice / markupFactor : ccPrice;
-  const standardMarkupRaw = standardUncapped - ccPrice;
-  const standardMarkup = Math.min(standardMarkupRaw, ccCap);
 
   // Margin floor: back-solve for price that yields exactly floorPct adjusted margin
   // Floor calculation EXCLUDES shipping (since shipping is pass-through, doesn't affect margin)
@@ -860,29 +1322,21 @@ function calc() {
   const floorDenom = 1 - commissionDecimal - floorAdjustment;
   const ccPriceFloor = floorDenom > 0 ? marginableMaterialCost / floorDenom : Infinity;
 
-  // Apply floor to CC. Then derive Standard from the floored CC.
-  const ccFloorApplied = ccPriceFloor > ccPrice;
+  // Apply floor to CC, then derive Standard from the final CC
+  const floorApplied = ccPriceFloor > ccPrice;
   const finalCcPrice = Math.max(ccPrice, ccPriceFloor);
-  let standardPrice;
-  if (!ccFloorApplied) {
-    standardPrice = ccPrice + standardMarkup;
-  } else {
-    const stdUncapped = markupFactor > 0 ? finalCcPrice / markupFactor : finalCcPrice;
-    const stdMarkupFromFloor = Math.min(stdUncapped - finalCcPrice, ccCap);
-    standardPrice = finalCcPrice + stdMarkupFromFloor;
-  }
-  const stdFloorApplied = ccFloorApplied;
+  const stdUncapped = markupFactor > 0 ? finalCcPrice / markupFactor : finalCcPrice;
+  const standardPrice = finalCcPrice + Math.min(stdUncapped - finalCcPrice, ccCap);
 
   // Active (quoted) BASE price (before shipping)
   const activeBasePrice = activeCustType === 'cc' ? finalCcPrice : standardPrice;
-  const floorAppliedToActive = activeCustType === 'cc' ? ccFloorApplied : stdFloorApplied;
 
   // Add shipping pass-through to BOTH displayed prices (no margin applied)
   const finalCcPriceWithShipping = finalCcPrice + shippingCost;
   const standardPriceWithShipping = standardPrice + shippingCost;
   const activePrice = activeBasePrice + shippingCost;
 
-  // Labor pay (tech commission) = % of the BASE quoted price (excludes shipping since shipping isn't margin-bearing)
+  // Labor pay (tech commission) = % of the BASE quoted price (excludes shipping)
   const laborPay = activeBasePrice * (commissionPct / 100);
 
   // Gross profit = Base price − Materials/refrigerant − Labor pay (shipping nets to zero)
@@ -893,20 +1347,16 @@ function calc() {
 
   // Render
   document.getElementById('sum-total').textContent = fmt(activePrice);
-  document.getElementById('sum-sub').textContent = activeCustType === 'cc' ? 'Comfort Club pricing' : 'Standard pricing';
 
   // Gross margin line under the big price (visible to all roles)
   const gmEl = document.getElementById('sum-gross-margin');
-  const gmLine = document.getElementById('gross-margin-line');
   gmEl.textContent = grossMargin.toFixed(1) + '%';
-  gmEl.className = '';
   if (grossMargin >= 50) gmEl.className = '';
   else if (grossMargin >= 45) gmEl.className = 'warn';
   else gmEl.className = 'bad';
-  gmLine.style.display = '';
+  document.getElementById('gross-margin-line').style.display = '';
 
   document.getElementById('price-comparison').style.display = '';
-  document.getElementById('empty-state').style.display = 'none';
   document.getElementById('sum-standard').textContent = fmt(standardPriceWithShipping);
   document.getElementById('sum-cc').textContent = fmt(finalCcPriceWithShipping);
 
@@ -917,7 +1367,7 @@ function calc() {
     .forEach(el => el.classList.toggle('active', activeCustType === 'cc'));
 
   // Admin breakdown
-  document.getElementById('bd-labor').textContent = fmt(breakEvenLabor);
+  document.getElementById('bd-labor').textContent = `${fmt(breakEvenLabor)} (${hrs(hours)})`;
   document.getElementById('bd-material').textContent = fmt(materialCost);
   document.getElementById('bd-refrigerant').textContent = refrigerantCost > 0 ? `${fmt(refrigerantCost)} (${refrigPounds} lbs ${refrigType})` : '$0';
   document.getElementById('bd-shipping').textContent = fmt(shippingCost);
@@ -926,14 +1376,51 @@ function calc() {
   document.getElementById('bd-profit').textContent = fmt(grossProfit);
   document.getElementById('bd-raw-margin').textContent = rawGrossMargin.toFixed(1) + '%';
   document.getElementById('bd-margin').textContent = grossMargin.toFixed(1) + '%';
-  const commLabel = document.getElementById('bd-commission-label');
-  if (commLabel) commLabel.textContent = `Tech labor pay (${commissionPct}%)`;
-  const adjLabel = document.getElementById('bd-margin-label');
-  if (adjLabel) adjLabel.textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
-  // Show floor banner if floor was applied to the active price (visible to everyone)
-  const floorBanner = document.getElementById('floor-banner');
-  floorBanner.style.display = floorAppliedToActive ? '' : 'none';
+  document.getElementById('bd-commission-label').textContent = `Tech labor pay (${commissionPct}%)`;
+  document.getElementById('bd-margin-label').textContent = `Adjusted margin (−${(laborLoadingPct + fudgePct).toFixed(0)}%)`;
+
+  // Floor banner (visible to everyone)
+  document.getElementById('floor-banner').style.display = floorApplied ? '' : 'none';
+
+  document.getElementById('copy-btn').disabled = false;
+  lastQuote = {
+    labor,
+    refrigType, refrigPounds,
+    standard: standardPriceWithShipping,
+    cc: finalCcPriceWithShipping,
+  };
 }
+
+// ============================================
+// COPY QUOTE SUMMARY
+// Plain text to paste into the ServiceTitan job/estimate notes, so whoever
+// reviews the quote can see the repair, the time, and why any time was added.
+// No internal costs or margins.
+// ============================================
+function quoteText(q) {
+  const ref = document.getElementById('job-ref').value.trim();
+  const out = [];
+  out.push(`HVAC Repair quote${ref ? ' — ' + ref : ''}`);
+  q.labor.items.forEach(it => out.push(`• ${it.label}: ${hrs(it.hours)}`));
+  if (q.labor.addlHours > 0) out.push(`• Additional time (${q.labor.reasonText}): ${hrs(q.labor.addlHours)}`);
+  out.push(`Total labor: ${hrs(q.labor.totalHours)}`);
+  if (q.refrigType && q.refrigPounds > 0) out.push(`Refrigerant: ${q.refrigPounds} lbs ${q.refrigType}`);
+  out.push(`Standard: ${fmt(q.standard)} · Comfort Club: ${fmt(q.cc)}`);
+  out.push(`Quoted by ${currentUser ? currentUser.name : '—'} on ${new Date().toLocaleDateString()}`);
+  return out.join('\n');
+}
+
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  if (!lastQuote) return;
+  const btn = document.getElementById('copy-btn');
+  try {
+    await navigator.clipboard.writeText(quoteText(lastQuote));
+    btn.textContent = 'Copied ✓';
+  } catch (e) {
+    btn.textContent = 'Could not copy';
+  }
+  setTimeout(() => { btn.textContent = 'Copy quote summary'; }, 1800);
+});
 
 // ============================================
 // CUSTOMER TYPE TOGGLE
@@ -957,9 +1444,18 @@ document.getElementById('passcode-input').addEventListener('keydown', (e) => {
 document.getElementById('home-btn').addEventListener('click', () => {
   window.location.href = '/';
 });
+document.getElementById('add-repair').addEventListener('click', () => {
+  lines.push(newLine());
+  renderLines();
+  calc();
+});
 document.getElementById('refresh-btn').addEventListener('click', loadPricing);
 document.addEventListener('input', calc);
 document.addEventListener('change', calc);
+
+renderReasons();
+renderLines();
+calc();
 
 // On load
 if (!restoreSession()) {
